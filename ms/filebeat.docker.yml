@@ -1,0 +1,25 @@
+filebeat.autodiscover: # Configuramos el autodescubrimiento de filebeat
+  providers:
+    - type: docker # Le decimos que debe buscar en archivos docker
+      labels.dedot: true
+      templates:
+        - condition: # Que condiciones debe poseer el archivo
+            contains:
+              container.labels.collect_logs_with_filebeat: "true" # Este caso que tenga el label collect_logs_with_filebeat con valor true
+          config:
+            - type: container #
+              format: docker
+              paths:
+                - "/var/lib/docker/containers/${data.docker.container.id}/*.log"
+              processors:
+                - decode_json_fields:
+                    when.equals:
+                      docker.container.labels.decode_log_event_to_json_object: "true"
+                    fields: ["message"]
+                    target: ""
+                    overwrite_keys: true
+
+output.logstash:
+  hosts: "logstash:5044"
+
+logging.metrics.enabled: false
