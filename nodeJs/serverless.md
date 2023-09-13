@@ -363,7 +363,25 @@ plugins:
   - serverless-dynamodb-local
 ```
 
-El siguiente paso es instalar local dynamo. Abrimos una consola de comando y nos paramos dentro de la carpeta de la aplicación. Acto seguido escribimos la siguiente línea de comando:
+Con esto agregado, el archivo `serverless.yml` queda de la siguiente forma:
+
+```yml
+service: crud-dynamo
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+ 
+plugins:
+  - serverless-dynamodb-local
+  - serverless-offline
+  
+functions:
+  #...
+```
+
+El siguiente paso es la instalación local de dynamo. Abrimos una consola de comando y nos paramos dentro de la carpeta de la aplicación `cd PATH/TO/FOLDER`. Acto seguido escribimos la siguiente línea de comando:
 
 - `sls dynamodb install`
 
@@ -377,13 +395,13 @@ Para iniciar el servidor de dynamodb usamos:
 
 - `sls dynamodb start`
 
-> Este comando puede dar el siguiente error [error-02](#error-02) o [error-03](#error-03)
+> Este comando puede dar uno de los siguientes errores [error-02](#error-02) o [error-03](#error-03)
 
 Si queremos correr las migraciones del esquema:
 
 -  `sls dynamodb start --migrate`
 
-Además, podemos utilizar la línea de comando para cambiar algunas propiedades como son el puerto o alguna semilla. Pero si queremos evitarnos este trabajo, podemos crear una serie de configuraciones en `serverless.yml`:
+Además, podemos utilizar la línea de comando para cambiar algunas propiedades como son el puerto o cargar una semilla; pero si queremos evitarnos este trabajo, podemos crear una serie de configuraciones en `serverless.yml`:
 
 ```yml
 custom:
@@ -399,6 +417,38 @@ custom:
       migrate: true # realizar las migraciones por defecto
       seed: true # Utilice una semilla para poblar la bd
       convertEmptyValues: true # Convertir los valores vacios a null
+``` 
+
+Quedando de la siguiente forma el archivo `serverless.yml`:
+
+```yml
+service: crud-dynamo
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+ 
+plugins:
+  - serverless-dynamodb-local
+  - serverless-offline
+
+custom:
+  dynamodb:
+    stages: # Estados donde usaremos dynamodb local
+      - dev
+    start: # Comando start
+      # docker: true # Usamos esta opción si tenemos dynamo en docker
+      port: 8000 # Puerto por donde va a levantar
+      inMemory: true # Se guardarán los datos en memoria
+      heapInitial: 200m # Tamaño a utilizar en la memoria al levantar
+      heapMax: 1g # Máximo tamaño que puede alcanzar la memoria de dynamo db
+      migrate: true # realizar las migraciones por defecto
+      seed: true # Utilice una semilla para poblar la bd
+      convertEmptyValues: true # Convertir los valores vacios a null
+  
+functions:
+  #...
 ```
 
 Ahora, con esto solo tenemos la configuración, pero no tenemos definido un esquema de trabajo de base de datos. Para ello añadimos la siguiente configuración en `serverless.yml`:
@@ -427,7 +477,7 @@ resources: # Apartado para declarar recursos
           WriteCapacityUnits: 1 # Cantidad de escrituras
 ```
 
-> Esto puede dar un error de validación: [error_04](#error-04)
+> Esto va a dar el siguiente error validación: [error_04](#error-04)
 
 Los tipos de atributos (`AttributeType`) permitidos por DynamoDB son:
 
@@ -480,6 +530,59 @@ custom:
         "description": "4"
     }
 ]
+```
+
+Habiendo terminado las configuraciones básicas para poder utilizar dynamodb en nuestro proyecto, el archivo `serverless.yml` queda de la siguiente forma:
+
+```yml
+service: crud-dynamo
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+ 
+plugins:
+  - serverless-dynamodb-local
+  - serverless-offline
+
+custom:
+  dynamodb:
+    stages: # Estados donde usaremos dynamodb local
+      - dev
+    start: # Comando start
+      # docker: true # Usamos esta opción si tenemos dynamo en docker
+      port: 8000 # Puerto por donde va a levantar
+      inMemory: true # Se guardarán los datos en memoria
+      heapInitial: 200m # Tamaño a utilizar en la memoria al levantar
+      heapMax: 1g # Máximo tamaño que puede alcanzar la memoria de dynamo db
+      migrate: true # realizar las migraciones por defecto
+      seed: true # Utilice una semilla para poblar la bd
+      convertEmptyValues: true # Convertir los valores vacios a null
+    seed: # Semilla a introducir
+      domain: # Tipo de semilla
+        sources: # Origen de la semilla
+          - table: itemTable # Tabla de la semilla
+            source: [./seed/initial.json] # Semilla
+
+resources: # Apartado para declarar recursos
+  Resources: # Recursos a utilizar 
+    itemTable: # Nombre del recurso
+      Type: AWS::DynamoDB::Table # Tipo de recurso
+      Properties: # Propiedades para ese recurso
+        TableName: itemTable # Nombre de la tabla
+        AttributeDefinitions: # Definición de los atributos de la tabla
+          - AttributeName: id
+            AttributeType: 'N'
+        KeySchema: # Llaves del esquema
+          - AttributeName: id # Campo de llave
+            KeyType: HASH # Tipo de llave
+      ProvisionedThroughput: # Capacidad que va a brindar
+          ReadCapacityUnits: 1  # Cantidad de lecturas
+          WriteCapacityUnits: 1 # Cantidad de escrituras
+  
+functions:
+  #...
 ```
 
 Cuando ejecutemos el comando de inicio de la base de datos, veremos los siguiente en consola:
