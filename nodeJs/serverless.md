@@ -270,7 +270,7 @@ Habiendo terminado las configuraciones pertinentes, podemos pasar a ver las func
 
 ```js
 // data
-module.export = class Data {
+module.exports = class Data {
   static items = [];
 }
 
