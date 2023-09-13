@@ -269,6 +269,14 @@ functions:
 Habiendo terminado las configuraciones pertinentes, podemos pasar a ver las funciones (*handlers*) creados por cada archivo:
 
 ```js
+// data
+module.export = class Data {
+  static const items = [];
+}
+
+// Al inicio de cada archivo
+const items = require('../config/data.js').items
+
 // list.getItems
 module.exports.getItems = async (event) => {
     return {
@@ -325,9 +333,8 @@ module.exports.deleteItem = async (event) =>  {
     try{
     const id = parseInt(event.pathParameters.id);
 
-    await database().send(new DeleteCommand({TableName: options.tableName, Key: {
-        id: id,
-    }}));
+    item = item.map(data => data.id != id);
+    
     body = {
       message: "Dato eliminado correctamente",
     }
@@ -335,7 +342,7 @@ module.exports.deleteItem = async (event) =>  {
   catch(e){
     logs.writeLog(e);
     body = {
-      title: "Hubo un error en el proceso de creación de datos",
+      title: "Hubo un error en el proceso de eliminación de datos",
       message: e,
       items: []
     }
