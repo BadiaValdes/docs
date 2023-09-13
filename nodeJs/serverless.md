@@ -342,7 +342,7 @@ module.exports.deleteItem = async (event) =>  {
   catch(e){
     logs.writeLog(e);
     body = {
-      title: "Hubo un error en el proceso de eliminación de datos",
+      title: "Hubo un error en el proceso de eliminación datos",
       message: e,
       items: []
     }
@@ -827,6 +827,77 @@ module.exports.updateItem = async (event) =>  {
 Para la operación buscar utilizamos `GetCommand`, el cual recibe como primer parámetro la tabla con la que estemos trabajando. En este caso, debemos pasar un segundo parámetro `id` que representa el objeto a buscar. Pero hay que tener en cuenta una cosa. Tenemos que capturar de la url el `id` pero al realizar la operación `JSON.parse` todos los datos se convierten en `string`; por lo que debemos convertir el valor del `id` en `int` mediante el método `parseInt`.
 
 Después de traer el dato de la base de datos y realizar las modificaciones pertinentes, debemos pasar a la actualización del objeto; para ello utilizamos el comando `PutCommand`. Este recibe como segundo parámetro el `Item` modificado.
+
+Posteriormente veremos la operación crear:
+
+```js
+module.exports.createItem = async (event) =>  {
+    let body = null;
+    let itemData = JSON.parse(event.body);
+    console.log(event);
+    try{
+    const {Items} = await database().send(new PutCommand({TableName: options.tableName, Item: itemData}));
+    body = {
+      message: "Dato creado correctamente",
+      items: Items
+    }
+  }
+  catch(e){
+    logs.writeLog(e);
+    body = {
+      title: "Hubo un error en el proceso de creación de datos",
+      message: e,
+      items: []
+    }
+  }
+    return {
+      statusCode: 200,
+      body: JSON.stringify(
+        body,
+        null,
+        2
+      ),
+    };
+  }
+```
+
+De la misma forma que usamos `PutCommand` para la actualización de datos en nuestra base de datos, puede ser utilizado para la creación de nuevos objetos.
+
+Terminemos con el delete:
+
+```js
+module.exports.deleteItem = async (event) =>  {
+    let body = null;
+    try{
+    const id = parseInt(event.pathParameters.id);
+
+    await database().send(new DeleteCommand({TableName: options.tableName, Key: {
+        id: id,
+    }}));
+    body = {
+      message: "Dato eliminado correctamente",
+    }
+  }
+  catch(e){
+    logs.writeLog(e);
+    body = {
+      title: "Hubo un error en el proceso de eliminar datos",
+      message: e,
+      items: []
+    }
+  }
+    return {
+      statusCode: 200,
+      body: JSON.stringify(
+        body,
+        null,
+        2
+      ),
+    };
+  }
+```
+
+Este último es bastante sencillo, solo tenemos recibir por el evento el  `pathParameters` y llamar el `DeleteCommand` con el `id` como `key`.
 
 A continuación, mostramos los comandos que utilizamos para trabajar (contra bd)
 - PutCommand
