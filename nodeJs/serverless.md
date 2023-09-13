@@ -35,7 +35,7 @@ Serverless es un modelo de computación en la nube en el que el proveedor de la 
 ## Qué debemos instalar?
 - Nodejs (https://nodejs.org/en/download)
 - (Recomendado) nvm --> Control de versiones de node
-    - (windows) https://github.com/nvm-sh/nvm
+    - (windows) https://github.com/coreybutler/nvm-windows
     - (Linux) https://github.com/nvm-sh/nvm
     - (mac) https://tecadmin.net/install-nvm-macos-with-homebrew/
 - serverles
