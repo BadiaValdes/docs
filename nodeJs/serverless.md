@@ -275,7 +275,7 @@ module.export = class Data {
 }
 
 // Al inicio de cada archivo
-const items = require('../config/data.js').items
+const items = require('../config/data').items
 
 // list.getItems
 module.exports.getItems = async (event) => {
