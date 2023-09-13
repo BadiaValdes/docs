@@ -333,7 +333,7 @@ module.exports.deleteItem = async (event) =>  {
     try{
     const id = parseInt(event.pathParameters.id);
 
-    item = item.map(data => data.id != id);
+    items = items.map(data => data.id != id);
     
     body = {
       message: "Dato eliminado correctamente",
