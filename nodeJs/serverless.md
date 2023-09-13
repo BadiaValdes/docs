@@ -1171,6 +1171,8 @@ module.exports = { addTask: handler }
 
 En este código usamos `middy` para encapsular nuestra función dentro de la cadena de middlewares y posteriormente le añadimos el middleware de `httpErrorHandler`. Esto último nos permite abstraernos de la lógica de devolución de errores y permitir que dicho middleware se encarge de todo el procedimiento de formateo y devolución de la información. 
 
+> falta probar
+
 ## Step Functions
 
 Las Step Functions son un servicio de AWS (Amazon Web Services) que permite coordinar y orquestar de manera visual y fácilmente los componentes de una aplicación distribuida. Son una forma de modelar y automatizar flujos de trabajo complejos, donde se pueden definir estados, decisiones y acciones a realizar en cada paso del proceso.
@@ -1189,9 +1191,14 @@ También probaremos la siguiente dependencia:
 
 Comencemos por la primera dependencia `serverless-step-functions-offline`:
 
+> Buscando información
+
 ## Logs
 
 Trabajemos ahora con los logs. Este apartado es bastante importante para el trabajo en aws ya que mediante los logs podemos verificar cualquier error que sea lanzado por nuestra aplicación.
+
+> Falta pasar la info brindada por el team que la tengo que pasar
+> Falta realizar pruebas
 
 
 # Comandos
