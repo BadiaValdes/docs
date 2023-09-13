@@ -34,9 +34,9 @@ Serverless es un modelo de computación en la nube en el que el proveedor de la 
 
 ## Qué debemos instalar?
 - Nodejs (https://nodejs.org/en/download)
-- (Opcional) nvm --> Control de versiones de node
+- (Recomendado) nvm --> Control de versiones de node
     - (windows) https://github.com/nvm-sh/nvm
-    - (Linux) 
+    - (Linux) https://github.com/nvm-sh/nvm
     - (mac) https://tecadmin.net/install-nvm-macos-with-homebrew/
 - serverles
   - `npm install -g serverless`
@@ -663,6 +663,8 @@ El entorno gráfico proporcionado por esta herramienta es el siguiente:
 > Para instalar recuerde que puede usar:
 > `yarn add LIBRERIA`
 > `npm i LIBRERIA`
+> Para iniciar servelress junto a la base de datos usamos el siguiente comando:
+> `serverles offline start`
 
 Comencemos creando un archivo que contenga la conexión a base de datos y sea reutilizable por toda la app. Comencemos por la importación de las librerías:
 
@@ -1067,85 +1069,31 @@ functions:
 
 Al terminar todas las configuraciones nuestro archivo `serverless.yml` queda de la siguiente forma:
 
-```
+```yml
 service: crud-dynamo
 frameworkVersion: '3'
 
 provider:
-  name: aws
-  runtime: nodejs18.x
-  region: us-east-1
-  httpApi:
-    cors: true
+  #...
   
 plugins:
   - serverless-dynamodb
   - serverless-offline
   
 custom:
-  dynamodb:
-    stages: # Estados donde usaremos dynamodb local
-     - dev
-    start: # Comando start
-      # docker: true # Usamos esta opción si tenemos dynamo en docker
-      port: 8000 # Puerto por donde va a levantar
-      inMemory: true # Se guardarán los datos en memoria
-      # heapInitial: 200m # Tamaño a utilizar en la memoria al levantar
-      # heapMax: 1g # Máximo tamaño que puede alcanzar la memoria de dynamo db
-      migrate: true # realizar las migraciones por defecto
-      # seed: true # Utilice una semilla para poblar la bd
-      # convertEmptyValues: true # Convertir los valores vacios a null
-
-    seed: # Semilla a introducir
-      domain: # Tipo de semilla
-        sources: # Origen de la semilla
-          - table: itemTable # Tabla de la semilla
-            source: [./seed/initial.json] # Semilla
-
+  #..
 
 resources: # Apartado para declarar recursos
-  Resources: # Recursos a utilizar 
-    itemTable: # Nombre del recurso
-      Type: AWS::DynamoDB::Table # Tipo de recurso
-      Properties: # Propiedades para ese recurso
-        TableName: itemTable # Nombre de la tabla
-        AttributeDefinitions: # Definición de los atributos de la tabla
-          - AttributeName: id # nombre del atributo
-            AttributeType: 'N' # Tipo de dato
-        KeySchema: # Llaves del esquema
-          - AttributeName: id # Campo de llave
-            KeyType: HASH # Tipo de llave
-        ProvisionedThroughput: # Capacidad que va a brindar
-          ReadCapacityUnits: 1  # Cantidad de lecturas
-          WriteCapacityUnits: 1 # Cantidad de escrituras
-        
-
-
+  #...
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+        - lambda:InvokeAsync
+      Resource: "*"
+       
 functions:
-  getItems:
-    handler: ./item/list.getItems
-    events: # Que eventos se pueden realizar
-      - httpApi: # Eventos tipos http
-          path: /items/ # Path de acceso al evento
-          method: get # Metodo que acepta el evento http
-  createItem:
-    handler: ./item/create.createItem
-    events:
-      - httpApi:
-          path: /item/
-          method: post
-  updateItem:
-    handler: ./item/update.updateItem
-    events:
-      - httpApi:
-          path: /item/{id}
-          method: put
-  deleteItem:
-    handler: ./item/delete.deleteItem
-    events:
-      - httpApi:
-          path: /item/{id}
-          method: delete
+  #...
   # Chain
   chain1:
     handler: ./chain/chain1.chain1
@@ -1159,13 +1107,6 @@ functions:
       - httpApi: # Eventos tipos http
           path: /chain2/ # Path de acceso al evento
           method: get # Metodo que acepta el evento http
-  
-  api: # Nombre de la función del api gateway
-    handler: index.handler # Encargado de manejar la petición
-    events: # Eventos esperados
-      - httpApi: # Evento tipo http (Accediendo a la función mediante una llamada http)
-          path: / # Path o dirección url de acceso a la función
-          method: get # Tipo de petición a realizar
 ```
 
 ## Middlewares y manejo de errores
@@ -1265,7 +1206,7 @@ Trabajemos ahora con los logs. Este apartado es bastante importante para el trab
 
 # Proyectos de interes
 - https://github.com/halarcont/serverless-aws-crud-dynamodb/blob/main/src/addTask.js
-- https://github.com/BadiaValdes/serverless-test-project
+- https://github.com/BadiaValdes/serverless-test-project (Proyecto por el que se está documentando)
 
 # Bibliografia
 
