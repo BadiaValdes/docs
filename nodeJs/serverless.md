@@ -14,7 +14,6 @@
   right:            0;
   display:          inline-flex;
   color:            #000000;
-
   cursor:           pointer;
   align-items:      center;
   justify-content:  center;
@@ -1241,6 +1240,7 @@ Trabajemos ahora con los logs. Este apartado es bastante importante para el trab
 - `aws config` -> configurar las credenciales de aws
 - `npm uninstall dependencia` -> Desintalar una dependencia npm installada
 - `npm install dependencia` -> Instalar dependencia
+- `sls dynamodb remove` -> Remover dynamodb (La base de datos descargada) del poryecto
 
 # Proyectos de interes
 - https://github.com/halarcont/serverless-aws-crud-dynamodb/blob/main/src/addTask.js
@@ -1318,8 +1318,8 @@ Trabajemos ahora con los logs. Este apartado es bastante importante para el trab
 > 
 > - Desintalar: `serverless-dynamodb-local`
 > - Instalar: `serverless-dynamodb `
-> - Instalar: `aws-dynamodb-local`
 > - Las instalaciones para development
+> - Para desintalar la dependencia usamos `npm uninstall serverless-dynamodb-local`
 >
 > En el yml cambiamos:
 > ```
