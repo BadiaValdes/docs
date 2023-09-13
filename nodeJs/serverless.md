@@ -370,12 +370,17 @@ El siguiente es el listar:
 - Respuesta:
 ![respuesta de busqueda de items](./assets/respuesta_busqueda_items.png)
 
-Terminemos con el update:
+Pasemos al update:
 - Petición:
 ![peticion de actualizar item](./assets/peticion_update_item.png)
-
 - Respuesta:
 ![respuesta de actualizar item](./assets/respuesta_actualizar_item.png)
+
+Terminemos con el delete:
+- Petición:
+![peticion de eliminar item](./assets/peticion_eliminar_item.png)
+- Respuesta:
+![respuesta de eliminar item](./assets/respuesta_eliminar_item.png)
 
 > Debemos aclarar que hicimos un poco de trampa en las pruebas. Todas las pruebas realizadas estaban utilizando una `base de datos`. Mencionamos esto debido a que pueden pensar que la variable `item` (global) almacenaría toda la información de los items que creemos. Pero tristemente no es así. Cuando un `lambda` se deja de ejecutar automaticamente se cierra el proceso de ejecución, por lo tanto, los datos almacenados en variables nos eliminados.
 
