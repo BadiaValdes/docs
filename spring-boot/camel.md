@@ -45,6 +45,8 @@ Apache Camel es un framework de integración de código abierto que permite a lo
 # Bibliografia
 
 ## General
+- https://lucian-davitoiu.medium.com/a-camel-project-example-with-java-beans-and-osgi-blueprint-in-karaf-5dc172e09829
+- https://stackabuse.com/example-apache-camel-with-blueprint/
 
 # Anotaciones
 
@@ -54,7 +56,7 @@ Hasta ahora he visto dos formas de trabajar con las rutas. Mediante DSL (JAVA) o
 
 > Etiqueta bean
 
-```
+```xml
 <bean class="org.apache.activemq.camel.component.ActiveMQComponent" id="beanAMQ">
     <property name="brokerURL" value="${amq.broker.url}"/>
     <property name="userName" value="${amq.username}"/>
@@ -63,4 +65,10 @@ Hasta ahora he visto dos formas de trabajar con las rutas. Mediante DSL (JAVA) o
 </bean>
 ```
 
-Esta etiqueta se utiliza para hacer referencia a un 
+Esta etiqueta se utiliza para hacer referencia a una función dentro de una clase de java:
+    - class: la dirección de la clase a utilizar
+    - id: el nombre que se le da al bean
+
+Dentro tiene una serie de `properties` que definen los datos necesarios para que la clase trabaje correctamente.
+
+>

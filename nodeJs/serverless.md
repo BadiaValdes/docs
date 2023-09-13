@@ -650,9 +650,9 @@ resources: # Apartado para declarar recursos
         KeySchema: # Llaves del esquema
           - AttributeName: id # Campo de llave
             KeyType: HASH # Tipo de llave
-      ProvisionedThroughput: # Capacidad que va a brindar
-          ReadCapacityUnits: 1  # Cantidad de lecturas
-          WriteCapacityUnits: 1 # Cantidad de escrituras
+        ProvisionedThroughput: # Capacidad que va a brindar
+            ReadCapacityUnits: 1  # Cantidad de lecturas
+            WriteCapacityUnits: 1 # Cantidad de escrituras
   
 functions:
   #...
