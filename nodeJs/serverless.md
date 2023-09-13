@@ -271,7 +271,7 @@ Habiendo terminado las configuraciones pertinentes, podemos pasar a ver las func
 ```js
 // data
 module.export = class Data {
-  static const items = [];
+  static items = [];
 }
 
 // Al inicio de cada archivo
