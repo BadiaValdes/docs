@@ -769,16 +769,20 @@ El siguiente paso es comenzar a utilizar la conexión a la base de datos en los 
 > ```
 > Los archivos que no se ven dentro de este documento pueden encontrarlos en el repositorio:
 > - https://github.com/BadiaValdes/serverless-test-project
+> o puede dirigirse a [códigos complementarios](#codigos-complementarios)
 >
 > La unica importación que varia en ada uno de los ficheros es:
 > `const { LIBRERIA } = require("@aws-sdk/lib-dynamodb");`
-> Ya que la función `Command` (función de acción sobre la base de datos) a utilizar depende de la acción que se va a realizar.
+> Ya que la función `Command` (función de acción sobre la base de datos) a utilizar depende de la acción que se va a realizar. 
 
 > Los comandos nos permiten realizar operaciones sobre dynamo de forma sencilla y legible. La idea es sustituir la palabra `LIBRERIA` anterior por uno de los comandos listados a continuación. 
 > - PutCommand -> Utilizar este cuando queramos crear o actualizar un dato en la base de datos
 > - GetCommand -> Utilizar este cuando queramos obtener uno o mas dato de la base de datos
 > - DeleteCommand -> Si queremos eliminar un elemento, este es nuestro comando.
 > - QueryCommand -> Nos permite realizar un query a la base de datos.
+>
+> Un ejemplo de esta importación para la obtención de datos en la base de datos es la siguiente:
+> `const { GetCommand } = require("@aws-sdk/lib-dynamodb");`
 
 Primero veremos la operación crear:
 
@@ -1558,4 +1562,49 @@ module.exports.updateItem = async (event) =>  {
       ),
     };
   }
+```
+
+# Codigos complementarios
+
+## Message.js
+```js
+module.exports = class Messages {
+    static getAllError = 'Hubo un error a la hora de realizar la busqueda';
+}
+```
+
+## Constant.js
+```js
+module.exports = class Constants {
+    static tableName = 'itemTable';
+
+    static items = [];
+
+    static infokeConfig = {
+        FunctionName: "crud-dynamo-dev-chain2", // Name of the function convention service-stage-function
+        InvocationType: "RequestResponse" , //"Event" || "RequestResponse" || "DryRun",
+        // LogType: "None" || "Tail",
+        // ClientContext: "STRING_VALUE",
+        Payload: "BLOB_VALUE",
+        // Qualifier: "STRING_VALUE",
+    }
+
+    static lambdaClientConfig = {
+        endpoint: "http://localhost:3002",
+        region: "eu-est-1",
+        credentials: {
+            accessKeyId: 'DEFAULT_ACCESS_KEY',
+            secretAccessKey: 'DEFAULT_SECRET',
+          },
+    }
+}
+```
+
+## Log.js
+```js
+module.exports = class Logs {
+    static writeLog(e){
+        console.log(e);
+    }
+}
 ```
