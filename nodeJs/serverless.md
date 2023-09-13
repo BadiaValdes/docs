@@ -228,7 +228,7 @@ El siguiente paso es instalar local dynamo. Abrimos una consola de comando y nos
 
 - `sls dynamodb install`
 
-> Esto puede levantar un error [error_01](#errors)
+> Esto puede levantar un error [error_01](#error-01)
 
 De esta forma ya tenemos instalado un jar local de dynamoDb. En caso que queramos eliminarlo podemos utilizar la siguiente línea de comando:
 
@@ -238,7 +238,7 @@ Para iniciar el servidor de dynamodb usamos:
 
 - `sls dynamodb start`
 
-> Este comando puede dar el siguiente error [error-02](#errors) o [error-03](#errors)
+> Este comando puede dar el siguiente error [error-02](#error-02) o [error-03](#error-03)
 
 Si queremos correr las migraciones del esquema:
 
@@ -288,7 +288,7 @@ resources: # Apartado para declarar recursos
           WriteCapacityUnits: 1 # Cantidad de escrituras
 ```
 
-> Esto puede dar un error de validación: [error_04](#errors)
+> Esto puede dar un error de validación: [error_04](#error-04)
 
 Los tipos de atributos (`AttributeType`) permitidos por DynamoDB son:
 
@@ -489,6 +489,8 @@ module.exports.updateItem = async (event) =>  {
   }
 ```
 
+> Se debe mencionar que si pasamos el `id` como parte del objeto del body o se lo añadimos tomandolo de la url, no es necesario realizar el `GetCommand` para obtener un valor. Ver los codigos alternativo [update item 1](#update-item-1) y [update item 2](#update-item-2)
+
 Para la operación buscar utilizamos `GetCommand`, el cual recibe como primer parámetro la tabla con la que estemos trabajando. En este caso, debemos pasar un segundo parámetro `id` que representa el objeto a buscar. Pero hay que tener en cuenta una cosa. Tenemos que capturar de la url el `id` pero al realizar la operación `JSON.parse` todos los datos se convierten en `string`; por lo que debemos convertir el valor del `id` en `int` mediante el método `parseInt`.
 
 Después de traer el dato de la base de datos y realizar las modificaciones pertinentes, debemos pasar a la actualización del objeto; para ello utilizamos el comando `PutCommand`. Este recibe como segundo parámetro el `Item` modificado.
@@ -638,6 +640,73 @@ module.exports.chain2 = async (event, context, callback) => {
 
 Que podemos observar en este método. Lo primero que salta a la vista es un `if` preguntando sobre el header de la variable evento. Esto se hace debido a que tenemos que conocer si la llamada se realizó mediante un evento http o directamente por invocación. Cuando la llamada a la lambda se realiza por HTTP el objeto `event` contiene información de dicha petición como pueden ser los `headers`; en cambio, cuando proviene de una invocación, solo se envía el dato específico proporcionado por la función anterior.
 
+## Middlewares y manejo de errores
+
+No es menos cierto que frameworks js como Express le permiten al programador abstraerse y solo pensar en la lógica del negocio en el programa principal, dejando procesos como validación, añadir tokens u otros similares a un mecanismo más general. Este mecanismo se llama middlewares y su función es mediar entre las peticiones recibidas o de salida con las funciones creadas. Para AWS poseemos una librería que nos permite la implementación de midddlewares, logrando una mejor separación del código y legibilidad.
+
+> La librería se llama **middy**
+> Para isntalarla usamos:
+> `npm install --save @middy/core`
+> Para agregar el manejo de errores añadimos:
+> `npm install --save @middy/http-error-handler`
+> Para más información de la librería pueden ir al sitio:
+> https://middy.js.org/docs/intro/getting-started
+
+Veamos un ejemplo de su uso:
+
+```js
+const middy = require('@middy/core')
+const httpErrorHandler = require('@middy/http-error-handler')
+
+const addTask = async (event) => {
+    try {
+        const dynamodb = new AWS.DynamoDB.DocumentClient();
+
+        const {title, description} = JSON.parse(event.body);
+
+        // Lanza un error si no se proporciona título o descripción
+        if (!title || !description) {
+            throw new createError.BadRequest('Título y descripción son requeridos');
+        }
+
+        const createdAt = new Date();
+        const id = v4();
+
+        const newTask ={
+            id,
+            title,
+            description,
+            createdAt,
+            done: false
+        }
+
+        await dynamodb.put({
+            TableName: 'TaskTable',
+            Item: newTask
+        }).promise()
+
+        return{
+            statusCode: 200,
+            body: JSON.stringify(newTask)
+        };
+    } catch (error) {
+        throw new createError.InternalServerError(error);
+    }
+};
+
+let handler = middy(addTask)
+handler.use(httpErrorHandler())
+
+module.exports = { addTask: handler }
+```
+
+En este código usamos `middy` para encapsular nuestra función dentro de la cadena de middlewares y posteriormente le añadimos el middleware de `httpErrorHandler`. Esto último nos permite abstraernos de la lógica de devolución de errores y permitir que dicho middleware se encarge de todo el procedimiento de formateo y devolución de la información. 
+
+## Logs
+
+Trabajemos ahora con los logs. Este apartado es bastante importante para el trabajo en aws ya que mediante los logs podemos verificar cualquier error que sea lanzado por nuestra aplicación.
+
+
 # Comandos
 - `serverless offline` -> Iniciar proyecto 
 - `serverless offline start` -> Iniciar proyecto y base de datos
@@ -645,6 +714,10 @@ Que podemos observar en este método. Lo primero que salta a la vista es un `if`
 - `dynamodb-admin` -> iniciar GUI admin de dynamo
 - `serverless dynamodb start` -> inicia base de datos dynamo local
 - `aws config` -> configurar las credenciales de aws
+- `npm uninstall dependencia` -> Desintalar una dependencia npm installada
+
+# Proyectos de interes
+- https://github.com/halarcont/serverless-aws-crud-dynamodb/blob/main/src/addTask.js
 
 # Bibliografia
 - https://www.serverless.com/
@@ -666,10 +739,11 @@ Que podemos observar en este método. Lo primero que salta a la vista es un `if`
 - https://aws.plainenglish.io/mastering-serverless-architecture-how-to-chain-lambda-functions-in-aws-for-high-performance-6e7eef0f9231
 - https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-lambda/
 - https://iamnoah1.medium.com/chaining-lambda-functions-using-the-serverless-framework-c88c10246d2e
+- https://middy.js.org/docs/intro/getting-started
 
 # Errors
 
-#### <a name="Error_01">Error_01</a>
+#### Error 01
 > **Problema**
 >
 > `Error getting DynamoDb local latest tar.gz location undefined: 403`
@@ -686,7 +760,7 @@ Que podemos observar en este método. Lo primero que salta a la vista es un `if`
 >   - `http = require("http")` por:
 >   - `http = require("https"),`
 
-#### Error_02
+#### Error 02
 
 > **Problema**
 >
@@ -714,7 +788,7 @@ Que podemos observar en este método. Lo primero que salta a la vista es un `if`
 >  - serverless-dynamodb
 > ```
 
-#### Error_03
+#### Error 03
 > **Problema**
 >
 > Llegados a este punto y tratando de probar la conexión, nos dio el siguiente error:
@@ -728,8 +802,10 @@ Que podemos observar en este método. Lo primero que salta a la vista es un `if`
 > Debemos configurar nuestras credenciales de aws dentro del pc (aunque sean de mentira).
 > Para ello escribimos el siguiente comando en una consola y rellenamos la información que se nos pida (pueden ser datos falsos menos la region. En ese caso usa uno de los permitidos):
 > - `aws configure` -> Se debe instalar aws-sdk en el pc
+>
+> En caso que te de error el comando `aws` debes instalar `aws cli`
 
-#### Error_04
+#### Error 04
 
 > **Problema**
 >
@@ -739,7 +815,7 @@ Que podemos observar en este método. Lo primero que salta a la vista es un `if`
 >
 > Este error viene dado por una malformación de los datos de la tabla. Especificamente en:
 >
-> ```
+> ```yml
 >         AttributeDefinitions: # Definición de los atributos de la tabla
 >           - AttributeName: name # Nombre del atributo
 >             AttributeType: S # Tipo de
@@ -754,7 +830,7 @@ Que podemos observar en este método. Lo primero que salta a la vista es un `if`
 > 
 > El problema radica en que la cantidad de valores en `AttributeDefinitions` deben ser igual a la cantidad puesta en `KeySchema`. Por lo tanto, solo declaramos las llaves que estaremos utilizando en el apartado de `AttributeDefinitions` y `KeySchema` definiría el tipo de llave a utilizar. Por lo que el código final queda de la siguiente forma:
 > 
-> ```
+> ```yml
 >  AttributeDefinitions: # Definición de los atributos de la tabla
 >     - AttributeName: id
 >       AttributeType: 'N'
@@ -763,7 +839,27 @@ Que podemos observar en este método. Lo primero que salta a la vista es un `if`
 >       KeyType: HASH # Tipo de llave
 > ```
 
-# Estructura de la variable event:
+#### Error 05
+
+> **Problema**
+>
+> ![security_token_error](./assets/security_token_error.png)
+> 
+> **Solucion**
+> En este caso se estaba utilizando la librería `aws-sdk` directamente y no `@aws-sdk` como hemos utilizado durante el proyecto.
+>
+> El problema radicaba en que el `sdk` estaba intentando conectarse a amazon para poder ejecutar los comandos internos. Al decirle que su objetivo (`endpoint`) es un servidor local no intentará más conectarse a aws.
+>
+>``` js
+> const AWS = require('aws-sdk');
+> // Configura AWS SDK para usar DynamoDB Local
+> AWS.config.update({
+>    region: "us-west-2",
+>    endpoint: "http://localhost:8000"
+> });
+> ```
+
+# Estructura de la variable event (Llamada http):
 ```js
 {
   body: '{\n\t"name":"Nombre",\n\t"description": "asyc"\n}',
@@ -808,4 +904,83 @@ Que podemos observar en este método. Lo primero que salta a la vista es un `if`
   version: '2.0'
 } 
 ```
+# Codigo alternativo
 
+### Update Item 1
+> Para la primera variante veremos como utilizar el id que viene de la url y añadirlo al objeto
+
+```js
+module.exports.updateItem = async (event) =>  {
+    let body = null;
+    try{
+    let itemData = JSON.parse(event.body);
+    const id = event.pathParameters.id;
+
+    // Opcion 1
+    item['id']=id;
+
+    // Opcion 2
+    item = {
+      ...item,
+      id: id,
+    }
+    
+    await database().send(new PutCommand({TableName: options.tableName, Item}));
+    body = {
+      message: "Dato modificado correctamente",
+      items: Item
+    }
+  }
+  catch(e){
+    logs.writeLog(e);
+    body = {
+      title: "Hubo un error en el proceso de creación de datos",
+      message: e,
+      items: []
+    }
+  }
+    return {
+      statusCode: 200,
+      body: JSON.stringify(
+        body,
+        null,
+        2
+      ),
+    };
+  }
+```
+
+### Update Item 2
+
+> La segunda variante es mucho más sencilla ya que desde el body vienen todo los datos necesarios.
+
+```js
+module.exports.updateItem = async (event) =>  {
+    let body = null;
+    try{
+    let itemData = JSON.parse(event.body);
+    
+    await database().send(new PutCommand({TableName: options.tableName, Item}));
+    body = {
+      message: "Dato modificado correctamente",
+      items: Item
+    }
+  }
+  catch(e){
+    logs.writeLog(e);
+    body = {
+      title: "Hubo un error en el proceso de creación de datos",
+      message: e,
+      items: []
+    }
+  }
+    return {
+      statusCode: 200,
+      body: JSON.stringify(
+        body,
+        null,
+        2
+      ),
+    };
+  }
+```
