@@ -1,5 +1,33 @@
 # Curso de serverless
 
+1. [Qué es serverless?](#qué-es-serverless)
+1. [Qué debemos instalar?](#qué-debemos-instalar)
+1. [Creando un proyecto](#creando-un-proyecto)
+1. [Iniciando nuestro proyecto](#iniciando-nuestro-proyecto)
+1. [Estructura del proyecto](#estructura-del-proyecto)
+1. [Estructura de serverless.yml](#estructura-de-serverlessyml)
+1. [Estructura de un método básico](#estructura-de-un-método-básico)
+1. [Como iniciar nuestra app](#como-iniciar-nuestra-app)
+1. [Agreguemos nuevos endpoints](#agreguemos-nuevos-endpoints)
+1. [Serverless con dynamo](#serverless-con-dynamo)
+1. [Utilizando dynamoDb en código](#utilizando-dynamodb-en-código)
+1. [Encadenando llamadas](#encadenando-llamadas)
+1. [Middlewares y manejo de errores](#middlewares-y-manejo-de-errores)
+1. [Logs](#logs)
+1. [Comandos](#comandos)
+1. [Proyectos de interes](#proyectos-de-interes)
+1. [Bibliografia](#bibliografia)
+1. [Errors](#errors)
+    1. [Error 1](#error-01)
+    1. [Error 2](#error-02)
+    1. [Error 3](#error-03)
+    1. [Error 4](#error-04)
+    1. [Error 5](#error-05)
+1. [Estructura de la variable event (Llamada http)](#estructura-de-la-variable-event-llamada-http)
+1. [Codigo alternativo](#codigo-alternativo)
+    1. [Update variante 1](#update-item-1)
+    1. [Update variante 2](#update-item-2)
+
 ## Qué es serverless?
 
 Serverless es un modelo de computación en la nube en el que el proveedor de la nube se encarga de aprovisionar y gestionar los servidores, y el cliente sólo paga por el tiempo de uso. Esto significa que los desarrolladores no tienen que preocuparse por la infraestructura subyacente, y pueden centrarse en escribir código.
@@ -91,16 +119,16 @@ provider: # Proveedor del servicio/ donde lo vamos a almacenar
   runtime: nodejs18.x
 
 # Tenemos que agregar esto
-plugins:
+plugins: # Todos los plugins que utilicemos se deben añadir en esta sección
  - serverless-offline
 
 functions: # las funciones de acceso a nuestra app. Esto funciona como una especie de Gateway
-  api:
-    handler: index.handler
-    events:
-      - httpApi:
-          path: /
-          method: get
+  api: # Nombre de la función del api gateway
+    handler: index.handler # Encargado de manejar la petición
+    events: # Eventos esperados
+      - httpApi: # Evento tipo http (Accediendo a la función mediante una llamada http)
+          path: / # Path o dirección url de acceso a la función
+          method: get # Tipo de petición a realizar
 ```
 
 ## Estructura de un método básico
@@ -121,7 +149,7 @@ module.exports.handler = async (event) => {
 ```
 - `module.exports`: nos permitirá exportar un arrow function que será usado en el serverless.yml para llamar la función a acceder desde el navegador.
 - `event`: posee una serie de datos del evento que desencadenó la función.
-- `return`: debe ser un json 
+- `return`: debe ser un json con la estructura statusCode y body. Se pueden agregar más cosas pero esas dos son las escenciales.
 
 ## Como iniciar nuestra app
 
@@ -133,42 +161,124 @@ Vamos a la consola y nos paramos en nuestro proyecto. Acto seguido escribimos la
 
 Y... ya. Servidor corriendo.
 
+## Probando por primera vez
+
+Ahora vamos a probar la función creada por defecto en nuestra aplicación serverless. Como se mencionó anteriormente, ejecutamos el comando `serverless offline` y este nos mostrará en consola lo siguiente:
+
+![Serverless start](./assets/serverless_start.png)
+
+Como podemos observar, el cuadro amarillo nos dice los `endpoints` o puntos de acceso http disponibles. Estos puntos vienen en pares (el tipo de petición y uno de tipo POST - el segundo siempre), nosotros utilizaremos el primero para realizar las llamadas http; en este caso estamos hablando de `http://localhost:3000/`.
+
+Conociendo esta información podemos ir directamente a realizar la llamada `http`. Para este caso decidimos utilizar `Postman`, pero sientete libre de usar cualquier otro software como `Insomnia` o llamadas mediante consola con `curl`.
+
+Para la llamada de postman seleccionaremos el método `GET` y como url `http://localhost:3000/`:
+
+![Postman header](./assets/postman_header_1.png)
+
+Presionamos el botón send y nos dirigimos al body para ver el resultado:
+
+![Resultado de la petición postman](./assets/postman_body_result_1.png)
+
 ## Agreguemos nuevos endpoints
 
-Para esta parte vamos a separar las funciones. Dejaremos en index la función de prueba de inicio y crearemos aparte un archivo para manejar items. Dentro crearemos una función para manejar el CRUD de items. Comencemos viendo como quedaría el archivo `serverless.yml` después de la transformación:
+Para esta parte vamos a separar las funciones. Dejaremos en index la función de prueba de inicio y crearemos aparte un archivo para manejar items. 
+
+Para ello creamos una carpeta llamada `item` y dentro separaremos en diferentes archivos `js` las acciones a realizar:
+
+![Estructura carpeta items](./assets/estructura_item.png)
+
+Antes de pasar a ver los códigos, vamos a añadir en apartado de `functions` dentro del archivo `serverless.yml` los siguientes `endpoints`:
 
 ```yml
-get:
-    handler: handlers/items.get
+getItems:
+  handler: ./item/list.getItems
+  events: # Que eventos se pueden realizar
+    - httpApi: # Eventos tipos http
+        path: /items/ # Path de acceso al evento
+        method: get # Metodo que acepta el evento http
+createItem:
+  handler: ./item/create.createItem
+  events:
+    - httpApi:
+        path: /item/
+        method: post
+updateItem:
+  handler: ./item/update.updateItem
+  events: # Que eventos se pueden realizar
+      - httpApi: # Eventos tipos http
+          path: /items/{id} # Path de acceso al evento. El {id} es la variable que se obtiene mediante la url (PathParametter)
+          method: put # Metodo que acepta el evento http
+deleteItem:
+  handler: ./item/delete.deleteItem
+  events:
+    - httpApi:
+        path: /item/{id}
+        method: delete
+```
+
+La diferencia con el enpdoint base visto en el apartado anterior radica en el update; específicamente en path, donde podemos observar el uso de `{id}`. Esto hace referencia a una variable de path, accesible mediante la variable event en la función. Veamos entonces como quedó el archivo `serverless.yml` después de agregar la información anterior:
+
+```yml
+service: serverless-api-project
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  httpApi:
+    cors: true
+  
+plugins:
+  - serverless-offline
+
+functions:
+  getItems:
+    handler: ./item/list.getItems
     events: # Que eventos se pueden realizar
       - httpApi: # Eventos tipos http
           path: /items/ # Path de acceso al evento
           method: get # Metodo que acepta el evento http
-  create:
-    handler: handlers/items.create
+  createItem:
+    handler: ./item/create.createItem
+    events:
+      - httpApi:
+          path: /item/
+          method: post
+  updateItem:
+    handler: ./item/update.updateItem
     events: # Que eventos se pueden realizar
-      - httpApi: # Eventos tipos http
-          path: /items/ # Path de acceso al evento
-          method: post # Metodo que acepta el evento http
-  update:
-    handler: handlers/items.update
-    events: # Que eventos se pueden realizar
-      - httpApi: # Eventos tipos http
-          path: /items/{id} # Path de acceso al evento
-          method: put # Metodo que acepta el evento http
+        - httpApi: # Eventos tipos http
+            path: /items/{id} # Path de acceso al evento. El {id} es la variable que se obtiene mediante la url (PathParametter)
+            method: put # Metodo que acepta el evento http
+  deleteItem:
+    handler: ./item/delete.deleteItem
+    events:
+      - httpApi:
+          path: /item/{id}
+          method: delete
+  api: # Nombre de la función del api gateway
+    handler: index.handler # Encargado de manejar la petición
+    events: # Eventos esperados
+      - httpApi: # Evento tipo http (Accediendo a la función mediante una llamada http)
+          path: / # Path o dirección url de acceso a la función
+          method: get # Tipo de petición a realizar
 ```
 
-La diferencia con lo visto anteriormente radica en el update; específicamente en path, donde podemos observar el uso de `{id}`. Esto hace referencia a una variable de path, accesible mediante la variable event en la función. Veamos las funciones involucradas:
+
+Habiendo terminado las configuraciones pertinentes, podemos pasar a ver las funciones (*handlers*) creados por cada archivo:
 
 ```js
-module.exports.get = async (event) => {
+// list.getItems
+module.exports.getItems = async (event) => {
     return {
         statusCode: 200,
         body: JSON.stringify(items),
     };
 }
 
-module.exports.create = async (event) => {   
+// create.createItem
+module.exports.createItem = async (event) => {   
     const element = JSON.parse(event.body); 
     items.push(element);
     return {
@@ -177,8 +287,8 @@ module.exports.create = async (event) => {
     };
 }
 
-module.exports.update = async (event) => {   
-
+// update.updateItem
+module.exports.updateItem = async (event) => {
     try{
         const id = event.pathParameters.id;
         const body = JSON.parse(event.body);
@@ -207,7 +317,36 @@ module.exports.update = async (event) => {
             })
         };
     }
+}
 ```
+
+Ahora pasemos a la parte divertida. Vamos a probar si nuestros `endpoints` están funcionando correctamente. Comencemos iniciando el servidor `serverless offline`:
+
+![Serverles start multi enpdoints](./assets/serverless_start_multi_endpoint.png)
+
+> Como agregamos más `enpoints` al apartado de `functions` dentro de `serverles.yml`, el recuadro es mucho más grande comparado con el visto anteriormente.
+
+Comencemos con la llamada al endpoint create:
+
+- Petición:
+![peticion de creación de item](./assets/peticion_item_crear.png)
+- Respuesta:
+![respuesta de creación de item](./assets/respuesta_creacion_item.png)
+
+El siguiente es el listar:
+- Petición:
+![peticion de busqueda de items](./assets/peticion_buscar_items.png)
+- Respuesta:
+![respuesta de busqueda de items](./assets/respuesta_busqueda_items.png)
+
+Terminemos con el update:
+- Petición:
+![peticion de actualizar item](./assets/peticion_update_item.png)
+
+- Respuesta:
+![respuesta de actualizar item](./assets/respuesta_actualizar_item.png)
+
+> Debemos aclarar que hicimos un poco de trampa en las pruebas. Todas las pruebas realizadas estaban utilizando una `base de datos`. Mencionamos esto debido a que pueden pensar que la variable `item` (global) almacenaría toda la información de los items que creemos. Pero tristemente no es así. Cuando un `lambda` se deja de ejecutar automaticamente se cierra el proceso de ejecución, por lo tanto, los datos almacenados en variables nos eliminados.
 
 ## Serverless con dynamo
 
@@ -563,7 +702,7 @@ Destripemos el método anterior. Comencemos por las importaciones:
 
 A continuación, crearemos la instancia del cliente y mostraremos la configuración utilizada:
 - `const client = new LambdaClient(consta.lambdaClientConfig);`
-  - Configuración:
+  - Configuración (Si no tenemos definida esta configuración nos podria dar un error similar a [error 06](#error-06)):
 ```js  
 static lambdaClientConfig = {
         endpoint: "http://localhost:3002",
@@ -702,6 +841,24 @@ module.exports = { addTask: handler }
 
 En este código usamos `middy` para encapsular nuestra función dentro de la cadena de middlewares y posteriormente le añadimos el middleware de `httpErrorHandler`. Esto último nos permite abstraernos de la lógica de devolución de errores y permitir que dicho middleware se encarge de todo el procedimiento de formateo y devolución de la información. 
 
+## Step Functions
+
+Las Step Functions son un servicio de AWS (Amazon Web Services) que permite coordinar y orquestar de manera visual y fácilmente los componentes de una aplicación distribuida. Son una forma de modelar y automatizar flujos de trabajo complejos, donde se pueden definir estados, decisiones y acciones a realizar en cada paso del proceso.
+
+Estas funciones se basan en el concepto de máquinas de estado finitas, donde se define un conjunto de estados y transiciones entre ellos. Cada estado puede realizar una tarea específica o tomar una decisión basada en los datos de entrada, y luego pasar al siguiente estado según la lógica definida.
+
+Firma: Por Chat GTP
+
+Para este apartado vamos a instalar la siguiente dependencia:
+- `serverless-step-functions-offline`
+
+También probaremos la siguiente dependencia:
+- `serverless-step-functions-local`
+- `serverless-step-functions` (Debe instalarse también)
+- `serverless-offline-lambda` (Debe instalarse también)
+
+Comencemos por la primera dependencia `serverless-step-functions-offline`:
+
 ## Logs
 
 Trabajemos ahora con los logs. Este apartado es bastante importante para el trabajo en aws ya que mediante los logs podemos verificar cualquier error que sea lanzado por nuestra aplicación.
@@ -715,6 +872,7 @@ Trabajemos ahora con los logs. Este apartado es bastante importante para el trab
 - `serverless dynamodb start` -> inicia base de datos dynamo local
 - `aws config` -> configurar las credenciales de aws
 - `npm uninstall dependencia` -> Desintalar una dependencia npm installada
+- `npm install dependencia` -> Instalar dependencia
 
 # Proyectos de interes
 - https://github.com/halarcont/serverless-aws-crud-dynamodb/blob/main/src/addTask.js
@@ -857,6 +1015,26 @@ Trabajemos ahora con los logs. Este apartado es bastante importante para el trab
 >    region: "us-west-2",
 >    endpoint: "http://localhost:8000"
 > });
+> ```
+
+#### Error 06
+
+> **Problema**
+>
+> ![lambda call error](./assets/lambda_call_security_token.jpg)
+> 
+> **Solucion**
+> Este error se debe a que el cliente para el llamado de las lambdas está intentando conectarse directamente a aws y no al servidor local. La solución es pasarle a la instancia de `LambdaClient` la siguiente configuración:
+>
+>``` js
+>static lambdaClientConfig = {
+>        endpoint: "http://localhost:3002",
+>        region: "eu-est-1",
+>        credentials: {
+>            accessKeyId: 'DEFAULT_ACCESS_KEY',
+>            secretAccessKey: 'DEFAULT_SECRET',
+>          },
+>    }
 > ```
 
 # Estructura de la variable event (Llamada http):
