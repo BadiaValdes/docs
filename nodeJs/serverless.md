@@ -1348,7 +1348,7 @@ Trabajemos ahora con los logs. Este apartado es bastante importante para el trab
 > **Solucion**
 >
 > Debemos configurar nuestras credenciales de aws dentro del pc (aunque sean de mentira).
-> Para ello escribimos el siguiente comando en una consola y rellenamos la información que se nos pida (pueden ser datos falsos menos la region. En ese caso usa uno de los permitidos):
+> Para ello escribimos el siguiente comando en una consola y rellenamos la información que se nos pida (pueden ser datos falsos menos la region. En ese caso usa uno de los permitidos - eu-east-1 - por ejemplo):
 > - `aws configure` -> Se debe instalar aws-sdk en el pc
 >
 > En caso que te de error el comando `aws` debes instalar `aws cli`:
