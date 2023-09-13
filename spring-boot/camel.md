@@ -42,9 +42,25 @@ Apache Camel es un framework de integración de código abierto que permite a lo
 - H2 database (Si queremos una bd ligera. Base de datos en memoria)
 - PostgresSQL Driver (Si queremos bd en postgres. En este caso no usamos la de arriba)
 
+# Bibliografia
+
+## General
+
 # Anotaciones
 
 ## Formas de las rutas
 
 Hasta ahora he visto dos formas de trabajar con las rutas. Mediante DSL (JAVA) o mediante Blueprint (XML). La primera la vimos anteriormente; en este apartado veremos la de XML (explicaremos las distintas etiquetas):
 
+> Etiqueta bean
+
+```
+<bean class="org.apache.activemq.camel.component.ActiveMQComponent" id="beanAMQ">
+    <property name="brokerURL" value="${amq.broker.url}"/>
+    <property name="userName" value="${amq.username}"/>
+    <property name="password" value="${amq.password}"/>
+    <property name="usePooledConnection" value="true"/>
+</bean>
+```
+
+Esta etiqueta se utiliza para hacer referencia a un 

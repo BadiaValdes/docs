@@ -1351,7 +1351,8 @@ Trabajemos ahora con los logs. Este apartado es bastante importante para el trab
 > Para ello escribimos el siguiente comando en una consola y rellenamos la información que se nos pida (pueden ser datos falsos menos la region. En ese caso usa uno de los permitidos):
 > - `aws configure` -> Se debe instalar aws-sdk en el pc
 >
-> En caso que te de error el comando `aws` debes instalar `aws cli`
+> En caso que te de error el comando `aws` debes instalar `aws cli`:
+> https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html#getting-started-install-instructions
 
 #### Error 04
 
