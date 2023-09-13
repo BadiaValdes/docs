@@ -43,3 +43,8 @@ Apache Camel es un framework de integración de código abierto que permite a lo
 - PostgresSQL Driver (Si queremos bd en postgres. En este caso no usamos la de arriba)
 
 # Anotaciones
+
+## Formas de las rutas
+
+Hasta ahora he visto dos formas de trabajar con las rutas. Mediante DSL (JAVA) o mediante Blueprint (XML). La primera la vimos anteriormente; en este apartado veremos la de XML (explicaremos las distintas etiquetas):
+
