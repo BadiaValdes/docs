@@ -318,6 +318,37 @@ module.exports.updateItem = async (event) => {
         };
     }
 }
+
+// delete.deleteItem
+module.exports.deleteItem = async (event) =>  {
+    let body = null;
+    try{
+    const id = parseInt(event.pathParameters.id);
+
+    await database().send(new DeleteCommand({TableName: options.tableName, Key: {
+        id: id,
+    }}));
+    body = {
+      message: "Dato eliminado correctamente",
+    }
+  }
+  catch(e){
+    logs.writeLog(e);
+    body = {
+      title: "Hubo un error en el proceso de creación de datos",
+      message: e,
+      items: []
+    }
+  }
+    return {
+      statusCode: 200,
+      body: JSON.stringify(
+        body,
+        null,
+        2
+      ),
+    };
+  }
 ```
 
 Ahora pasemos a la parte divertida. Vamos a probar si nuestros `endpoints` están funcionando correctamente. Comencemos iniciando el servidor `serverless offline`:
@@ -585,7 +616,7 @@ functions:
   #...
 ```
 
-Cuando ejecutemos el comando de inicio de la base de datos, veremos los siguiente en consola:
+Cuando ejecutemos el comando de inicio de la base de datos (`sls dynamodb start`), veremos los siguiente en consola:
 
 ```bash
 Dynamodb Local Started, Visit: http://localhost:8000/shell
@@ -602,19 +633,24 @@ El siguiente paso es ir a las variables de entorno y agregar:
 
 Para iniciar el GUI para dynamo escribimos en nuestra consola:
 - `dynamodb-admin`
+- Este nos proporcionará el siguiente punto de acceso: `http://:::8001`
+
+El entorno gráfico proporcionado por esta herramienta es el siguiente:
+
+![Interfaz grafica de dynamodb admin](./assets/dynamo_admin_gui.png)
 
 > El seed no he logrado que funcione. Nada más lo haga, agrego.
 
 ## Utilizando dynamoDb en código
 
 > Para este apartado debemos instalar en nuestra app
-> - aws-sdk (Si queremos acceso a todas las funcionalidades)
+> - `aws-sdk` (Si queremos acceso a todas las funcionalidades)
 > Si queremos optimizar el peso de la app:
-> - @aws-sdk/client-dynamodb 
-> - @aws-sdk/lib-dynamodb
+> - `@aws-sdk/client-dynamodb`
+> - `@aws-sdk/lib-dynamodb`
 > Para instalar recuerde que puede usar:
-> yarn add LIBRERIA
-> npm i LIBRERIA
+> `yarn add LIBRERIA`
+> `npm i LIBRERIA`
 
 Comencemos creando un archivo que contenga la conexión a base de datos y sea reutilizable por toda la app. Comencemos por la importación de las librerías:
 
@@ -655,7 +691,41 @@ module.exports.connectionDB = () => {
 }
 ```
 
-Para hacer la conexión reusable, implementamos el patrón singleton. Además estamos utilizando la variable de entorno `IS_OFFLINE` para no cambiar nuestro código de producción a desarrollo; esa variable de entorno se encargará de ello por nosotros. El siguiente paso es comenzar a utilizar la conexión a la base de datos en los endpoints. Comencemos por buscar todos los datos almacenados en la base de datos:
+Para hacer la conexión reusable, implementamos el patrón singleton. Además estamos utilizando la variable de entorno `IS_OFFLINE` para no cambiar nuestro código de producción a desarrollo; esa variable de entorno se encargará de ello por nosotros. El archivo de configuración de base de datos queda de la siguiente forma:
+
+```js
+const {DynamoDBClient} = require('@aws-sdk/client-dynamodb')
+const { DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
+
+const dataConnection = {
+    region: 'localhost', // Aquí pondremos la región de aws que estemos utilizando
+    endpoint: 'http://localhost:8000', // El endpoint de conección a base de datos   
+    accessKeyId: 'AWS_ACCESS_KEY_ID',  // needed if you don't have aws credentials at all in env
+    secretAccessKey: 'DEFAULT_SECRET' 
+};
+
+let connection = null;
+
+module.exports.connectionDB = () => {
+    if(connection) return connection;
+    const client = process.env.IS_OFFLINE ? new DynamoDBClient(dataConnection) : new DynamoDBClient();
+    connection = DynamoDBDocumentClient.from(client);  
+    return connection;
+}
+```
+
+El siguiente paso es comenzar a utilizar la conexión a la base de datos en los endpoints. Comencemos por buscar todos los datos almacenados en la base de datos:
+
+> En todos los archivos se tuvieron que realizar las siguientes importaciones:
+> ```js
+> const database = require('../config/dynamo').connectionDB;
+> const logs = require('../config/log');
+> const messages = require('../config/message');
+> const options = require('../config/constant');
+> ```
+> La unica importación que varia es:
+> `const { LIBRERIA } = require("@aws-sdk/lib-dynamodb");`
+> Ya que el `Command` a utilizar depende de la acción que se va a realizar.
 
 ```js
 module.exports.getItems = async (event) => {
@@ -687,6 +757,13 @@ module.exports.getItems = async (event) => {
 ```
 
 Gracias a la librería `DynamoDBDocumentClient` podemos utilizar una serie de comandos que nos permiten realizar de forma sencilla operaciones en la base de datos. En este caso estamos utilizando `ScanCommand` que recibe el nombre de nuestra base de datos por parámetros. Esta operación nos permitirá traer todos los datos pertenecientes a nuestra tabla.
+
+> Prueba del endpoint
+- Petición:
+![peticion de busqueda de items](./assets/peticion_buscar_items.png)
+- Respuesta:
+![respuesta de busqueda de items](./assets/respuesta_get_all.png)
+
 
 El próximo en ver será la operación de actualizar que trae implicita buscar un elemento:
 
@@ -731,6 +808,8 @@ module.exports.updateItem = async (event) =>  {
   }
 ```
 
+> La prueba es similar a la vista en el apartado [Agregar nuevos endpoints](#agreguemos-nuevos-endpoints)
+
 > Se debe mencionar que si pasamos el `id` como parte del objeto del body o se lo añadimos tomandolo de la url, no es necesario realizar el `GetCommand` para obtener un valor. Ver los codigos alternativo [update item 1](#update-item-1) y [update item 2](#update-item-2)
 
 Para la operación buscar utilizamos `GetCommand`, el cual recibe como primer parámetro la tabla con la que estemos trabajando. En este caso, debemos pasar un segundo parámetro `id` que representa el objeto a buscar. Pero hay que tener en cuenta una cosa. Tenemos que capturar de la url el `id` pero al realizar la operación `JSON.parse` todos los datos se convierten en `string`; por lo que debemos convertir el valor del `id` en `int` mediante el método `parseInt`.
@@ -752,6 +831,7 @@ Vamos un poco más lejos en el estudio de las lambdas. En este apartado veremos 
 
 ```yml
 provider:
+  #...
   iamRoleStatements:
       - Effect: Allow
         Action:
@@ -882,6 +962,129 @@ module.exports.chain2 = async (event, context, callback) => {
 
 Que podemos observar en este método. Lo primero que salta a la vista es un `if` preguntando sobre el header de la variable evento. Esto se hace debido a que tenemos que conocer si la llamada se realizó mediante un evento http o directamente por invocación. Cuando la llamada a la lambda se realiza por HTTP el objeto `event` contiene información de dicha petición como pueden ser los `headers`; en cambio, cuando proviene de una invocación, solo se envía el dato específico proporcionado por la función anterior.
 
+El siguiente paso es agregar los endpoints a nuestro archivo `serverless.yml`:
+
+```yml
+#...
+functions:
+  #...
+  chain1:
+    handler: ./chain/chain1.chain1
+    events: # Que eventos se pueden realizar
+      - httpApi: # Eventos tipos http
+          path: /chain1/{id} # Path de acceso al evento
+          method: get # Metodo que acepta el evento http
+  chain2:
+    handler: ./chain/chain2.chain2
+    events: # Que eventos se pueden realizar
+      - httpApi: # Eventos tipos http
+          path: /chain2/ # Path de acceso al evento
+          method: get # Metodo que acepta el evento http
+```
+
+Al terminar todas las configuraciones nuestro archivo `serverless.yml` queda de la siguiente forma:
+
+```
+service: crud-dynamo
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  httpApi:
+    cors: true
+  
+plugins:
+  - serverless-dynamodb
+  - serverless-offline
+  
+custom:
+  dynamodb:
+    stages: # Estados donde usaremos dynamodb local
+     - dev
+    start: # Comando start
+      # docker: true # Usamos esta opción si tenemos dynamo en docker
+      port: 8000 # Puerto por donde va a levantar
+      inMemory: true # Se guardarán los datos en memoria
+      # heapInitial: 200m # Tamaño a utilizar en la memoria al levantar
+      # heapMax: 1g # Máximo tamaño que puede alcanzar la memoria de dynamo db
+      migrate: true # realizar las migraciones por defecto
+      # seed: true # Utilice una semilla para poblar la bd
+      # convertEmptyValues: true # Convertir los valores vacios a null
+
+    seed: # Semilla a introducir
+      domain: # Tipo de semilla
+        sources: # Origen de la semilla
+          - table: itemTable # Tabla de la semilla
+            source: [./seed/initial.json] # Semilla
+
+
+resources: # Apartado para declarar recursos
+  Resources: # Recursos a utilizar 
+    itemTable: # Nombre del recurso
+      Type: AWS::DynamoDB::Table # Tipo de recurso
+      Properties: # Propiedades para ese recurso
+        TableName: itemTable # Nombre de la tabla
+        AttributeDefinitions: # Definición de los atributos de la tabla
+          - AttributeName: id # nombre del atributo
+            AttributeType: 'N' # Tipo de dato
+        KeySchema: # Llaves del esquema
+          - AttributeName: id # Campo de llave
+            KeyType: HASH # Tipo de llave
+        ProvisionedThroughput: # Capacidad que va a brindar
+          ReadCapacityUnits: 1  # Cantidad de lecturas
+          WriteCapacityUnits: 1 # Cantidad de escrituras
+        
+
+
+functions:
+  getItems:
+    handler: ./item/list.getItems
+    events: # Que eventos se pueden realizar
+      - httpApi: # Eventos tipos http
+          path: /items/ # Path de acceso al evento
+          method: get # Metodo que acepta el evento http
+  createItem:
+    handler: ./item/create.createItem
+    events:
+      - httpApi:
+          path: /item/
+          method: post
+  updateItem:
+    handler: ./item/update.updateItem
+    events:
+      - httpApi:
+          path: /item/{id}
+          method: put
+  deleteItem:
+    handler: ./item/delete.deleteItem
+    events:
+      - httpApi:
+          path: /item/{id}
+          method: delete
+  # Chain
+  chain1:
+    handler: ./chain/chain1.chain1
+    events: # Que eventos se pueden realizar
+      - httpApi: # Eventos tipos http
+          path: /chain1/{id} # Path de acceso al evento
+          method: get # Metodo que acepta el evento http
+  chain2:
+    handler: ./chain/chain2.chain2
+    events: # Que eventos se pueden realizar
+      - httpApi: # Eventos tipos http
+          path: /chain2/ # Path de acceso al evento
+          method: get # Metodo que acepta el evento http
+  
+  api: # Nombre de la función del api gateway
+    handler: index.handler # Encargado de manejar la petición
+    events: # Eventos esperados
+      - httpApi: # Evento tipo http (Accediendo a la función mediante una llamada http)
+          path: / # Path o dirección url de acceso a la función
+          method: get # Tipo de petición a realizar
+```
+
 ## Middlewares y manejo de errores
 
 No es menos cierto que frameworks js como Express le permiten al programador abstraerse y solo pensar en la lógica del negocio en el programa principal, dejando procesos como validación, añadir tokens u otros similares a un mecanismo más general. Este mecanismo se llama middlewares y su función es mediar entre las peticiones recibidas o de salida con las funciones creadas. Para AWS poseemos una librería que nos permite la implementación de midddlewares, logrando una mejor separación del código y legibilidad.
@@ -979,28 +1182,50 @@ Trabajemos ahora con los logs. Este apartado es bastante importante para el trab
 
 # Proyectos de interes
 - https://github.com/halarcont/serverless-aws-crud-dynamodb/blob/main/src/addTask.js
+- https://github.com/BadiaValdes/serverless-test-project
 
 # Bibliografia
+
+### Pagina Oficial
 - https://www.serverless.com/
-- https://www.w3schools.com/aws/serverless/index.php
-- https://www.tutorialspoint.com/serverless/serverless_deploying_function.htm
+
+### Instalacion
 - https://www.enmilocalfunciona.io/aprendiendo-serverless-framework-parte-2-instalacion/
+
+### Deploy
+- https://www.tutorialspoint.com/serverless/serverless_deploying_function.htm
+
+### Typescirpt
 - https://blog.logrocket.com/building-serverless-app-typescript/
+
+### Step Functions
+- https://www.npmjs.com/package/@vibou/serverless-step-functions-offline
+
+### Ejemplos Online
+- https://github.com/serverless/examples
+
+### DynamoDb
+- https://www.serverless.com/plugins/serverless-dynamodb-local
+- https://www.serverless.com/framework/docs/providers/aws/guide/resources/#configuration
+- https://www.serverless.com/examples/aws-node-rest-api-with-dynamodb-and-offline
+
+### Llamadas entre lambdas
+- https://aws.plainenglish.io/mastering-serverless-architecture-how-to-chain-lambda-functions-in-aws-for-high-performance-6e7eef0f9231
+- https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-lambda/
+- https://iamnoah1.medium.com/chaining-lambda-functions-using-the-serverless-framework-c88c10246d2e
+- https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-lambda/
+
+### Middleware y manejo de errores
+- https://middy.js.org/docs/intro/getting-started
+
+### Otros
+- https://www.w3schools.com/aws/serverless/index.php
+- https://dev.to/awscommunity-asean/challenge-3-using-offline-tools-to-speed-up-dev-in-serverless-2hp8
+- https://dev.to/slsbytheodo/dont-miss-on-the-cloud-revolution-learn-serverless-on-aws-the-right-way-1kac
 - https://www.trendmicro.com/en_us/devops/22/c/how-to-build-a-serverless-api-with-lambda-and-node-js.html
 - https://hackernoon.com/a-crash-course-on-serverless-with-node-js-632b37d58b44
 - https://medium.com/@dan.avila7/prueba-tus-proyectos-serverless-de-forma-local-con-serverless-offline-2e555f2b5e9b
 - https://devopscube.com/serverless-framework-tutorial/
-- https://dev.to/slsbytheodo/dont-miss-on-the-cloud-revolution-learn-serverless-on-aws-the-right-way-1kac
-- https://www.npmjs.com/package/@vibou/serverless-step-functions-offline
-- https://github.com/serverless/examples
-- https://www.serverless.com/plugins/serverless-dynamodb-local
-- https://www.serverless.com/framework/docs/providers/aws/guide/resources/#configuration
-- https://dev.to/awscommunity-asean/challenge-3-using-offline-tools-to-speed-up-dev-in-serverless-2hp8
-- https://www.serverless.com/examples/aws-node-rest-api-with-dynamodb-and-offline
-- https://aws.plainenglish.io/mastering-serverless-architecture-how-to-chain-lambda-functions-in-aws-for-high-performance-6e7eef0f9231
-- https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-lambda/
-- https://iamnoah1.medium.com/chaining-lambda-functions-using-the-serverless-framework-c88c10246d2e
-- https://middy.js.org/docs/intro/getting-started
 
 # Errors
 
