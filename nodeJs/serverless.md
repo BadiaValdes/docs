@@ -696,7 +696,7 @@ El entorno gráfico proporcionado por esta herramienta es el siguiente:
 > Para iniciar servelress junto a la base de datos usamos el siguiente comando:
 > `serverles offline start`
 
-Comencemos creando un archivo que contenga la conexión a base de datos y sea reutilizable por toda la app. Comencemos por la importación de las librerías:
+Comencemos creando un archivo llamado `dynamo.js` que contendrá la conexión a base de datos y sea reutilizable por toda la app. Comencemos por la importación de las librerías:
 
 ```js
 const {DynamoDBClient} = require('@aws-sdk/client-dynamodb')
@@ -722,7 +722,7 @@ En este caso estamos creando una variable que posee los parámetros de conexión
 
 > Antes de continuar con la documentación, probamos el proyecto y nos dio un error de certificados: [error_03](#errors)
 
-Terminada la importación y declarar la variable de configuración podemos comenzar a crear la instancia de acceso a la base de datos:
+Terminada la importación y declarar la variable de configuración podemos comenzar a crear la instancia de acceso a la base de datos. Para hacer la conexión reusable, implementamos el patrón singleton. Además utilizaremos la variable de entorno `IS_OFFLINE` para no cambiar nuestro código de producción a desarrollo; esa variable de entorno se encargará de ello por nosotros ya que en dependencia de cómo iniciemos serverless, su valor será `true` o `false`.
 
 ```js
 let connection = null;
@@ -735,7 +735,7 @@ module.exports.connectionDB = () => {
 }
 ```
 
-Para hacer la conexión reusable, implementamos el patrón singleton. Además estamos utilizando la variable de entorno `IS_OFFLINE` para no cambiar nuestro código de producción a desarrollo; esa variable de entorno se encargará de ello por nosotros. El archivo de configuración de base de datos queda de la siguiente forma:
+El archivo de configuración de base de datos queda de la siguiente forma:
 
 ```js
 const {DynamoDBClient} = require('@aws-sdk/client-dynamodb')
@@ -767,9 +767,55 @@ El siguiente paso es comenzar a utilizar la conexión a la base de datos en los 
 > const messages = require('../config/message');
 > const options = require('../config/constant');
 > ```
-> La unica importación que varia es:
+> Los archivos que no se ven dentro de este documento pueden encontrarlos en el repositorio:
+> - https://github.com/BadiaValdes/serverless-test-project
+>
+> La unica importación que varia en ada uno de los ficheros es:
 > `const { LIBRERIA } = require("@aws-sdk/lib-dynamodb");`
-> Ya que el `Command` a utilizar depende de la acción que se va a realizar.
+> Ya que la función `Command` (función de acción sobre la base de datos) a utilizar depende de la acción que se va a realizar.
+
+> Los comandos nos permiten realizar operaciones sobre dynamo de forma sencilla y legible. La idea es sustituir la palabra `LIBRERIA` anterior por uno de los comandos listados a continuación. 
+> - PutCommand -> Utilizar este cuando queramos crear o actualizar un dato en la base de datos
+> - GetCommand -> Utilizar este cuando queramos obtener uno o mas dato de la base de datos
+> - DeleteCommand -> Si queremos eliminar un elemento, este es nuestro comando.
+> - QueryCommand -> Nos permite realizar un query a la base de datos.
+
+Primero veremos la operación crear:
+
+```js
+module.exports.createItem = async (event) =>  {
+    let body = null;
+    let itemData = JSON.parse(event.body);
+    console.log(event);
+    try{
+    const {Items} = await database().send(new PutCommand({TableName: options.tableName, Item: itemData}));
+    body = {
+      message: "Dato creado correctamente",
+      items: Items
+    }
+  }
+  catch(e){
+    logs.writeLog(e);
+    body = {
+      title: "Hubo un error en el proceso de creación de datos",
+      message: e,
+      items: []
+    }
+  }
+    return {
+      statusCode: 200,
+      body: JSON.stringify(
+        body,
+        null,
+        2
+      ),
+    };
+  }
+```
+
+Gracias a la librería `DynamoDBDocumentClient` podemos utilizar una serie de comandos que nos permiten realizar de forma sencilla operaciones en la base de datos. El comando `PutCommand` nos permite actualizar y crear datos en base de datos. La idea es pasar como primer parámetro del comando el nombre de la tabla y como segundo le debemos enviar los datos que queramos insertar dentro de la variable `Item`.
+
+El proximo en ver es el `getItems` encargado de buscar los datos en bd:
 
 ```js
 module.exports.getItems = async (event) => {
@@ -800,7 +846,7 @@ module.exports.getItems = async (event) => {
   }
 ```
 
-Gracias a la librería `DynamoDBDocumentClient` podemos utilizar una serie de comandos que nos permiten realizar de forma sencilla operaciones en la base de datos. En este caso estamos utilizando `ScanCommand` que recibe el nombre de nuestra base de datos por parámetros. Esta operación nos permitirá traer todos los datos pertenecientes a nuestra tabla.
+ En este caso estamos utilizando `ScanCommand` que recibe el nombre de nuestra base de datos por parámetros. Esta operación nos permitirá traer todos los datos pertenecientes a nuestra tabla.
 
 > Prueba del endpoint
 - Petición:
@@ -860,41 +906,6 @@ Para la operación buscar utilizamos `GetCommand`, el cual recibe como primer pa
 
 Después de traer el dato de la base de datos y realizar las modificaciones pertinentes, debemos pasar a la actualización del objeto; para ello utilizamos el comando `PutCommand`. Este recibe como segundo parámetro el `Item` modificado.
 
-Posteriormente veremos la operación crear:
-
-```js
-module.exports.createItem = async (event) =>  {
-    let body = null;
-    let itemData = JSON.parse(event.body);
-    console.log(event);
-    try{
-    const {Items} = await database().send(new PutCommand({TableName: options.tableName, Item: itemData}));
-    body = {
-      message: "Dato creado correctamente",
-      items: Items
-    }
-  }
-  catch(e){
-    logs.writeLog(e);
-    body = {
-      title: "Hubo un error en el proceso de creación de datos",
-      message: e,
-      items: []
-    }
-  }
-    return {
-      statusCode: 200,
-      body: JSON.stringify(
-        body,
-        null,
-        2
-      ),
-    };
-  }
-```
-
-De la misma forma que usamos `PutCommand` para la actualización de datos en nuestra base de datos, puede ser utilizado para la creación de nuevos objetos.
-
 Terminemos con el delete:
 
 ```js
@@ -931,11 +942,6 @@ module.exports.deleteItem = async (event) =>  {
 
 Este último es bastante sencillo, solo tenemos recibir por el evento el  `pathParameters` y llamar el `DeleteCommand` con el `id` como `key`.
 
-A continuación, mostramos los comandos que utilizamos para trabajar (contra bd)
-- PutCommand
-- GetCommand
-- DeleteCommand
-- QueryCommand -> Nos permite realizar un query a la base de datos.
 
 ## Encadenando llamadas
 
