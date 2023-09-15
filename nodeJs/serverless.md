@@ -1252,7 +1252,7 @@ module.exports.middlewares = {
 }
 ```
 
-Ahora solo nos toca agregar estos middleware al código anterior:
+Ahora solo nos toca agregar estos middlewares al código anterior:
 
 ```js
 const middy = require('@middy/core'); // Importación de librería middy
@@ -1276,7 +1276,7 @@ module.exports.middyWrapper = middy(throwError).use(httpErrorHandler())
 .use(middlewares.errorLogMiddleware()) // Aqui añadimos el middleware para el mano de errores
 .use(middlewares.inputValidationMiddleware()); // Este se encarga de validar que el dato esté correcto
 ```
-Probemos a ver si de verdad se cumplen los dos middleware:
+Probemos a ver si de verdad se cumplen los dos middlewares:
 
 - Petición
 ![test_middleware](./assets/test_middleware.png)
@@ -1287,6 +1287,129 @@ Probemos a ver si de verdad se cumplen los dos middleware:
 - Consola
 ![console_test_middleware](./assets/console_test_middleware.png)
 
+## Logs
+
+Trabajemos ahora con los logs. Este apartado es bastante importante para el trabajo en aws ya que mediante los logs podemos verificar cualquier error que sea lanzado por nuestra aplicación. Pero antes de continuar debemos mencionar algunas prácticas que se deben seguir:
+
+-	Configuración de Logs en tu Aplicación: Verificar que la aplicación este configurada para generar logs. 
+-	Integración con CloudWatch: CloudWatch puede recibir logs de diversas fuentes, incluyendo instancias EC2, servicios como Lambda, contenedores, y más. La aplicación se puede configurar para enviar logs directamente a CloudWatch.
+-	Configurar Agentes o Bibliotecas: Si la aplicación se está ejecutando en un servidor local, se puede instalar el agente de CloudWatch Logs. Este agente recopila y envía logs a CloudWatch. También existen bibliotecas y SDKs específicos para diferentes lenguajes que facilitan el envío de logs a CloudWatch.
+-	Crear Grupos de Logs: Los grupos de logs permiten filtrar y buscar logs de manera más efectiva.
+-	Configurar Retención de Logs: Definir cuánto tiempo mantener los logs. 
+-	Configurar Métricas y Alarmas: Se puede configurar una alarma que avise cuando ciertos eventos ocurran con una cierta frecuencia.
+-	Explorar y Buscar Logs: Desde el panel de CloudWatch en la consola de AWS se puede explorar y buscar logs directamente. También se puede utilizar la consola de CloudWatch Logs Insights para realizar consultas avanzadas.
+-	Integración con otros Servicios: CloudWatch Logs se integra bien con otros servicios de AWS, como Lambda, Elastic Beanstalk, y más. Esto permite centralizar y analizar logs de múltiples fuentes.
+-	Configurar Exportación de Logs:  El servicio CloudWatch se puede configurar para exportar logs, por ejemplo: a Amazon S3 o a Amazon Elasticsearch Service.
+-	Automatizar y Personalizar: CloudWatch Logs puedes utilizarse junto con AWS CloudFormation o AWS CDK para automatizar la configuración de logs.
+
+Sabiendo esto, vamos al grano. Existen muchas formas de crear logs en nuestra aplicación, pero la idea es que dichos logs sean capturados por `CloudWatch` para su posterior revisión y no hay que dejar de lado que debemos usar librerías ligeras para evitar recargar nuestra aplicación. 
+
+Ahora se deben estar preguntando: si tiene que ser ligera, ¿Porqué no usamos console.log?. No es una mala idea, pero los mensajes por consola nativos de javascript no son totalmente compatibles con la plataforma `CloudWatch` y puede que perdamos información por el camino. Otra idea sería usar un software de tercero como `ELK` para el trabajo con logs, pero la idea de usar `aws` es debido que queremos abaratar costos; usar `ELK` demandaría alquilar un servidor de hosteo.
+
+Después de investigar un poco sobre librerías para crear logs en `node.js` nos topamos con las tres siguientes:
+- Winston
+- Bunyan
+- Pino
+
+Las dos primeras son pesos pesados dentro de la categoría de generación de logs y `Pino` se ofrece como una alternativa ligera. Pero buscando en los paquetes oficiales de npm vimos que Pino tiene un peso de `681kb` en comparación a los `201kb` de `buyan` y los `268kb` de `winston`. Aunque puede que a simple vista `681kb` no parezca mucho, recuerden que esto es una aplicación y también estamos utilizando otras librerías que agregan peso a nuestra aplicación final; y no se puede olvidar que debemos crear la aplicación lo más ligera posible. No estoy diciendo que cambiemos rendimiento por ligereza, si tenemos una librería que pesa `1mb`, por ejemplo, y es la que nos resuelve el problema de la forma más óptima, bienvenida sea.
+
+En nuestro caso decidimos utilizar `Bunyan`; por lo que comencemos por ver como se va a instalar:
+
+> `yarn add bunyan`
+
+> Existe un wrapper para esta librería dirigida directamente a aws
+> `aws-bunyan` -> Pesa `283kb` -> https://www.npmjs.com/package/aws-bunyan
+
+> En este caso voy a comprometer el peso de la app para usar el wrapper ya que en los ejemplos provistos en la página de npm permite logear información extra proporcionada por aws. Por lo tanto:
+> `yarn add aws-bunyan`
+
+> Una última aclaración antes de continuar. Si queremos realizar el proceso de logs totalmente manual; es decir, nosotros mismos enviar los logs a `cloudWatch`, podemos utilizar la librería:
+> `@aws-sdk/client-cloudwatch-logs`
+
+Para la parte de logs vamos a utilizar el archivo `logs.js` que se encuentra dentro de la carpeta `conf`. Veamos, antes de seguir, la estructura que tenía hasta el momento este archivo:
+
+```js
+module.exports = class Logs {
+    static writeLog(e){
+        console.log(e);
+    }
+}
+```
+
+La clase de logs no es la gran cosa y tampoco realizaremos muchos cambios. La idea es organizar el código ya que crear logs es bastante sencillo. Comencemos por agregar el siguiente método:
+
+```js
+static bunyanWriteLog(logInstance, level, message, extraInfo){
+    logInstance[level](message, extraInfo);
+}
+```
+
+Intentamos hacer genérico este método, eso lo explicaremos en un momento; comencemos por parámetros pasamos:
+- `logInstance` -> Representa la instancia de la interfaz `ILogger` que veremos en un momento.
+- `level` -> Representa el nivel del `log` que se quiere realizar. Para evitar errores creamos un objeto dentro de la clase `Constants` en el archivo `constants.js`:
+> ```js
+> module.exports = class Constants {
+> //...
+> static bunyanLogType = {
+>   info: 'info',
+>   debug: 'debug',
+>   error: 'error',
+>   setContext: 'setContext',
+>   warn: 'warn',
+> }
+>}
+> ```
+- `message` -> Almacena el mensaje principal a mostrarse en el log.
+- `extraInfo` -> En caso que queramos pasar un objeto para que aparezca en el log, esta es tu variable. **No pases texto, te lo convierte en objeto directamente**.
+
+Para probar el uso de los logs utilizamos la función `errorLogMiddleware` dentro del archivo `middleware.js`:
+
+```js
+// importaciones nuevas
+const { ILogger, logFactory } = require('aws-bunyan'); // Importación de la librería
+const logs = require('./log') // Importación de la clase para manejar los logs
+
+// Declaración de las variables para los logs
+const logTypes = require('./constant').bunyanLogType // Esta variable posee los enum para los tipos de logs permititods
+
+const logInstance = logFactory.createLogger('MiddlewareLogs') // Instancia de la clase logFactory de bunyan. Le pasamos por parámetros un nombre para identificar que clase o archivo lanzó el log.
+
+//...
+
+const errorLogMiddleware = () => { // Declaro mi middleware
+    return {
+        onError: async (handler, next) => { // En este caso vamos a crear un middleware que se ejecute cuando exista un error
+          const {error} = handler; // Sacamos el valor del error del handler
+
+          // Lo imprimimos en la consola mediante bunyan
+          logs.bunyanWriteLog(logInstance, logTypes.error, 'Log from middleware using bunyan');
+          logs.bunyanWriteLog(logInstance, logTypes.warn, 'Log from middleware using bunyan', {hola: "mundo"});
+
+          // Modificamos la respuesta
+          handler.response = {
+            statusCode: error.statusCode || 500,
+            body: JSON.stringify({
+              message: 'Error en el middleware',
+            }),
+          }
+        }
+    }
+}
+
+//...
+```
+
+Terminado los códigos, llega la fase de prueba:
+
+- Petición:
+![error request for bunyan log](./assets/bunyan_error_request.png)
+
+- Consola:
+![bunyan log](./assets/bunyan_console_log.png)
+
+Como podemos ver en la respuesta de la consola, la decisión de usar bunyan como librería para el manejo de logs fue aceptada. Incluso podemos apreciar como en el log aparece información propia de la función lambda que estamos utilizando.
+
+> Recuerde que todos los códigos los puede ver en el repositorio https://github.com/BadiaValdes/serverless-test-project
 
 ## Step Functions
 
@@ -1294,7 +1417,7 @@ Las Step Functions son un servicio de AWS (Amazon Web Services) que permite coor
 
 Estas funciones se basan en el concepto de máquinas de estado finitas, donde se define un conjunto de estados y transiciones entre ellos. Cada estado puede realizar una tarea específica o tomar una decisión basada en los datos de entrada, y luego pasar al siguiente estado según la lógica definida.
 
-Firma: Por Chat GTP
+Firma: Chat GPT
 
 Para este apartado vamos a instalar la siguiente dependencia:
 - `serverless-step-functions-offline`
@@ -1308,12 +1431,7 @@ Comencemos por la primera dependencia `serverless-step-functions-offline`:
 
 > Buscando información
 
-## Logs
-
-Trabajemos ahora con los logs. Este apartado es bastante importante para el trabajo en aws ya que mediante los logs podemos verificar cualquier error que sea lanzado por nuestra aplicación.
-
-> Falta pasar la info brindada por el team que la tengo que pasar
-> Falta realizar pruebas
+## Comunicación entre lambdas (`message broker`)
 
 
 # Comandos
@@ -1347,6 +1465,7 @@ Trabajemos ahora con los logs. Este apartado es bastante importante para el trab
 
 ### Step Functions
 - https://www.npmjs.com/package/@vibou/serverless-step-functions-offline
+-https://medium.com/atheneum-partners-digitalization/how-to-run-serverless-step-functions-offline-26b7b994d2b5&ved=2ahUKEwjW89_z4qyBAxXWlIkEHYxBB5EQFnoECBYQAQ&usg=AOvVaw37w8fSu-cmClkfvrjd3DxR
 
 ### Ejemplos Online
 - https://github.com/serverless/examples
@@ -1368,6 +1487,7 @@ Trabajemos ahora con los logs. Este apartado es bastante importante para el trab
 
 ### Logs
 - https://www.npmjs.com/package/bunyan
+- https://npm.io/package/@aws-sdk/client-cloudwatch-logs
 ### Otros
 - https://www.w3schools.com/aws/serverless/index.php
 - https://dev.to/awscommunity-asean/challenge-3-using-offline-tools-to-speed-up-dev-in-serverless-2hp8
@@ -1681,8 +1801,8 @@ module.exports = class Constants {
 ## Log.js
 ```js
 module.exports = class Logs {
-    static writeLog(e){
-        console.log(e);
-    }
+  static writeLog(e){
+      console.log(e);
+  }
 }
 ```
