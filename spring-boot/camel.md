@@ -26,9 +26,21 @@ Apache Camel es un framework de integración de código abierto que permite a lo
 - *Endpoint*
     - Son los puntos que permiten la coneción entre sistemas.
 - Producidores (*producer*)
-    - Componente que se encargar de crear y enviar los mensajes a los endpoints.
+    - Componente (*endpoint*) que se encargar de crear y enviar los mensajes.
 - Consumidores (*consumer*)
-    - Componente que recibe los mensajes creados por los productores y los envian a los procesadores.
+    - Componente que consume datos de una fuente y envia el mensaje a un *producer* u otro *consumer*.
+
+# Concepto de trabajo de camel
+
+Basicamente se puede decir que a primeras cuentas Camel es un mediador `middleware` de aplicaciones que permite la integración de diferentes sistemas. Su objetivo es utilizar rutas que tienen un punto de entrada y uno de salida, siendo el primero el encargado de iniciar el proceso de trabajo de una ruta y el útlimo hacia donde se enviaría el resultado de ese proceso.
+
+A groso modo, la estructura que siguen las rutas de camel es la siguiente:
+
+```js
+from(source) // Este es el consumidor, el que permite disparar una ruta
+.transform(tranformation) // Procesos intermedios de tranformación de la información
+.to(destination) // Hacia donde vamos a enviar el objeto creado
+```
 
 # Creando nuestra app
 
@@ -47,6 +59,12 @@ Apache Camel es un framework de integración de código abierto que permite a lo
 ## General
 - https://lucian-davitoiu.medium.com/a-camel-project-example-with-java-beans-and-osgi-blueprint-in-karaf-5dc172e09829
 - https://stackabuse.com/example-apache-camel-with-blueprint/
+
+## Tutorial
+- https://www.toptal.com/apache/integracion-optimizada-de-software-un-tutorial-de-apache-camel
+- https://www.tutorialspoint.com/apache_camel/index.htm
+- https://www.javadevjournal.com/spring-boot/apache-camel-spring-boot/
+- https://reflectoring.io/spring-camel/
 
 # Anotaciones
 
@@ -313,7 +331,7 @@ Es importante decir que esta etiqueta va dentro del `doTry`; a continuación ver
 
 Esta etiqueta es un encapsulador de condiciones. Funciona similar a un if o a un switch; puede ser visto de cualquiera de las dos formas. Es el encargado de definir las diferentes rutas que puede seguir una petición endependencia de los criterios de comparación.
 
-### La condición (`when`)
+### La condición (`when`) | (`setBody`, `setHeader`)
 
 ```xml
 <when id="inicioWhenOperacionConsultar">
@@ -329,7 +347,7 @@ La etiqueta `when` sigue siendo un encapsulador para una sola condición. La ide
 - la condición que se debe cumplir
 - las operaciones a realizar si se cumple
 
-En este caso se esta realizando la comparación mediante la etiqueta `simple` donde podemos ver que pregunta si la operacoines dentro del header `${header.operationName}` es igual al valor `consultar`. Posteriormente se realiza la acción `setBody` que tiene como objetivo modificar el valor del cuerpo del mensaje. En este caso estamos seteando el primer valor del body anterior. Por último tenemos una llamada a otra ruta mediante el `to`.
+En este caso se esta realizando la comparación mediante la etiqueta `simple` donde podemos ver que pregunta si la operacoines dentro del header `${header.operationName}` es igual al valor `consultar`. Posteriormente se realiza la acción `setBody` que tiene como objetivo modificar el valor del cuerpo del mensaje. En este caso estamos seteando el primer valor del body anterior. Por último tenemos una llamada a otra ruta mediante el `to`. En caso que queramos realizar un seteo del valor del header, utilizamos la etiqueta `setHeader`.
 
 ### En caso contrario (`otherwise`)
 
@@ -435,4 +453,12 @@ La pripiedad `uri` de esta etiqueta define hacia donde se debe dirigir la inform
 ```
 
 Supongamos que tenemos varios `when` dentro de un `choice` y posteriormente otra serie de pasos a ejecutar. Supongamos que el mensaje llegó a un `when` que debería terminar la ejecución completa de la ruta. En este caso debemos utilizar la etiqueta `stop` ya que su función es terminar con la propagación de un mensaje dentro de las rutas de `camel`.
+
+### Referencia (`reference`)
+
+```xml
+<reference id="bindy" interface="org.apache.camel.spi.DataFormatResolver" timeout="30000" />
+```
+
+La etiqueta referencia permite crear una referencia simbólica a un componente o servicio externo que será utilizado posteriormente en la ruta de Camel. Donde el atributo de `interface` es encargado de apuntar a la interfaz de ese componente o servicio externo.
 

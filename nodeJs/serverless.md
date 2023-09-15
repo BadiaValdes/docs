@@ -858,7 +858,6 @@ module.exports.getItems = async (event) => {
 - Respuesta:
 ![respuesta de busqueda de items](./assets/respuesta_get_all.png)
 
-
 El próximo en ver será la operación de actualizar que trae implicita buscar un elemento:
 
 ```js
@@ -1149,6 +1148,16 @@ functions:
           method: get # Metodo que acepta el evento http
 ```
 
+Teniendo todo programado es hora de pasar a la parte práctica que tanto nos gusta. Vamos a iniciar el server y acceder a `Postman` en este caso. El ejemplo va a seguir la siguiente estructura:
+1. Enviar una petición `GET` al endopint `http://localhost:3000/chain1/{id}`   
+    1. Sustituir `{id}` por el número 12
+1. Realizar la petición y ver como se devuelve el valor de la segunda `lambda`.
+
+- Petición:
+![Petición para llamada anidada](./assets/request_chain_call.png)
+- Respuesta:
+![Respuesta para la llamada anidada](./assets/respuesta_chain_call.png)
+
 ## Middlewares y manejo de errores
 
 No es menos cierto que frameworks js como Express le permiten al programador abstraerse y solo pensar en la lógica del negocio en el programa principal, dejando procesos como validación, añadir tokens u otros similares a un mecanismo más general. Este mecanismo se llama middlewares y su función es mediar entre las peticiones recibidas o de salida con las funciones creadas. Para AWS poseemos una librería que nos permite la implementación de midddlewares, logrando una mejor separación del código y legibilidad.
@@ -1160,58 +1169,124 @@ No es menos cierto que frameworks js como Express le permiten al programador abs
 > `npm install --save @middy/http-error-handler`
 > Para más información de la librería pueden ir al sitio:
 > https://middy.js.org/docs/intro/getting-started
+>
+> Para poder levantar errores de tipo HTTP (no vienen predefinido en js), podemos usar la siguietne librería: https://www.npmjs.com/package/http-errors. 
+> Tenga en cuenta que mientras más librerías le adiciones al proyecto, este pesará mucho más y amazon cobra también por espacio de almacenamiento.
 
-Veamos un ejemplo de su uso:
+Veamos un ejemplo sencillo de su uso:
 
 ```js
-const middy = require('@middy/core')
-const httpErrorHandler = require('@middy/http-error-handler')
+const middy = require('@middy/core'); // Importación de librería middy
+const httpErrorHandler = require('@middy/http-error-handler') // Middleware de middy
+const createError = require('http-errors')
 
-const addTask = async (event) => {
-    try {
-        const dynamodb = new AWS.DynamoDB.DocumentClient();
+const throwError = (event) => {
+    const id = parseInt(event.pathParameters.id)
 
-        const {title, description} = JSON.parse(event.body);
-
-        // Lanza un error si no se proporciona título o descripción
-        if (!title || !description) {
-            throw new createError.BadRequest('Título y descripción son requeridos');
-        }
-
-        const createdAt = new Date();
-        const id = v4();
-
-        const newTask ={
-            id,
-            title,
-            description,
-            createdAt,
-            done: false
-        }
-
-        await dynamodb.put({
-            TableName: 'TaskTable',
-            Item: newTask
-        }).promise()
-
-        return{
-            statusCode: 200,
-            body: JSON.stringify(newTask)
-        };
-    } catch (error) {
-        throw new createError.InternalServerError(error);
+    if(id < 10){
+        throw createError(500, 'El número es menor que 10')
+    } else if(id > 10 && id < 21){
+        throw createError(400, 'El número es mayor que 10 y menor que 21')
+    } else {
+        throw createError[400]
     }
-};
+}
 
-let handler = middy(addTask)
-handler.use(httpErrorHandler())
-
-module.exports = { addTask: handler }
+module.exports.middyWrapper = middy(throwError).use(httpErrorHandler());
 ```
 
-En este código usamos `middy` para encapsular nuestra función dentro de la cadena de middlewares y posteriormente le añadimos el middleware de `httpErrorHandler`. Esto último nos permite abstraernos de la lógica de devolución de errores y permitir que dicho middleware se encarge de todo el procedimiento de formateo y devolución de la información. 
+En este código usamos `middy` para encapsular nuestra función dentro de la cadena de middlewares y posteriormente (mediante `use`) le añadimos el middleware de `httpErrorHandler`. Esto último nos permite abstraernos de la lógica de devolución de errores y permitir que dicho middleware se encarge de todo el procedimiento de formateo y devolución de la información. 
 
-> falta probar
+Pasemos a la fase de prueba:
+
+- Petición
+![error_test](./assets/error_test.png)
+
+- Respuesta
+![response_error_test](./assets/response_error_test.png)
+
+De esta forma podemos comprobar que el *middleware* está realizando su trabajo ya que el error omite algunos datos innecesarios para la respuesta. Ahora, no se asusten porque en la consola salga la siguiente información:
+
+![middy_error](./assets/middy_error.png)
+
+Esto no es un error en sí, sino una forma que `middy` posee para informarle al programador que hubo una excepción capturada por el *middleware*. Hablando de *middleware*, que pasaría si queremos crear nuestra propia función intermedia para realizar procesos de `logeo` por ejemplo. Para este ejemplo crearemos un archivo llamado `middleware.js` dentro de la carpeta `config` (donde almacenamos nuestros archivos de configuración). Dentro pondremos un *middleware* dirigido a modificar el valor del id si sobrepasa una cantidad específica, esto se realizaría antes de entrar al `handler`; el segundo *middleware* solo se ejecutará en caso que exista un error y su función es mostrarlo en consola.
+
+```js
+const inputValidationMiddleware = () => { // Declaro mi middleware
+    return {
+        before: async (handler) => { // Podemos tener tres tipos de llamadas del middleware before | after | onError
+            const { httpMethod, pathParameters } = handler.event; // Desagregamos el objeto event del handler que estemos usando
+
+            if(pathParameters.id > 100){ // Preguntamos si el id es mayor a 100
+                pathParameters.id = 5; // Le asignamos el valor 5 al id
+            }
+            handler.event.pathParameters = pathParameters; // Asignamos el nuevo cuerpo al handler
+        }
+    }
+}
+
+const errorLogMiddleware = () => { // Declaro mi middleware
+    return {
+        onError: async (handler, next) => { // En este caso vamos a crear un middleware que se ejecute cuando exista un error
+          const {error} = handler; // Sacamos el valor del error del handler
+
+          // Lo imprimimos en la consola
+          console.log("Error imprimido dentro del handler");
+          console.log(error)
+
+          // Modificamos la respuesta
+          handler.response = {
+            statusCode: error.statusCode || 500,
+            body: JSON.stringify({
+              message: 'Error en el middleware',
+            }),
+          }
+        }
+    }
+}
+
+// La exportación para nuestra comodidad la podemos hacer en formato de objeto
+module.exports.middlewares = {
+    inputValidationMiddleware,
+    errorLogMiddleware,
+}
+```
+
+Ahora solo nos toca agregar estos middleware al código anterior:
+
+```js
+const middy = require('@middy/core'); // Importación de librería middy
+const httpErrorHandler = require('@middy/http-error-handler') // Middleware de middy
+const createError = require('http-errors')
+const middlewares = require('../config/middleware').middlewares;
+
+const throwError = (event) => {
+    const id = parseInt(event.pathParameters.id)
+
+    if(id < 10){
+        throw createError(500, 'El número es menor que 10')
+    } else if(id > 10 && id < 21){
+        throw createError(400, 'El número es mayor que 10 y menor que 21')
+    } else {
+        throw createError[400]
+    }
+}
+
+module.exports.middyWrapper = middy(throwError).use(httpErrorHandler())
+.use(middlewares.errorLogMiddleware()) // Aqui añadimos el middleware para el mano de errores
+.use(middlewares.inputValidationMiddleware()); // Este se encarga de validar que el dato esté correcto
+```
+Probemos a ver si de verdad se cumplen los dos middleware:
+
+- Petición
+![test_middleware](./assets/test_middleware.png)
+
+- Respuesta
+![response_test_middleware](./assets/response_test_middleware.png)
+
+- Consola
+![console_test_middleware](./assets/console_test_middleware.png)
+
 
 ## Step Functions
 
@@ -1289,7 +1364,10 @@ Trabajemos ahora con los logs. Este apartado es bastante importante para el trab
 
 ### Middleware y manejo de errores
 - https://middy.js.org/docs/intro/getting-started
+- https://blog.logrocket.com/writing-aws-lambda-middleware-middy-js/
 
+### Logs
+- https://www.npmjs.com/package/bunyan
 ### Otros
 - https://www.w3schools.com/aws/serverless/index.php
 - https://dev.to/awscommunity-asean/challenge-3-using-offline-tools-to-speed-up-dev-in-serverless-2hp8
