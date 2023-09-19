@@ -54,17 +54,25 @@ from(source) // Este es el consumidor, el que permite disparar una ruta
 - H2 database (Si queremos una bd ligera. Base de datos en memoria)
 - PostgresSQL Driver (Si queremos bd en postgres. En este caso no usamos la de arriba)
 
+> Más adelante veremos otras dependencias a insertar
+
+## Creación de los componentes base
+
+> En este apartado veremos las entidades, servicios y repositorios que vamos a utilizar
+
 # Bibliografia
 
 ## General
 - https://lucian-davitoiu.medium.com/a-camel-project-example-with-java-beans-and-osgi-blueprint-in-karaf-5dc172e09829
 - https://stackabuse.com/example-apache-camel-with-blueprint/
+- https://camel.apache.org/components/4.0.x/index.html
 
 ## Tutorial
 - https://www.toptal.com/apache/integracion-optimizada-de-software-un-tutorial-de-apache-camel
 - https://www.tutorialspoint.com/apache_camel/index.htm
 - https://www.javadevjournal.com/spring-boot/apache-camel-spring-boot/
 - https://reflectoring.io/spring-camel/
+- http://www.masterspringboot.com/camel/apache-camel-rest-example-for-beginners/
 
 # Anotaciones
 
@@ -438,13 +446,13 @@ En este caso vamos a intentar añadir datos al header del mensaje. Especificamen
 
 ### Realizar copia del mensaje (`wireTap`)
 
-Esta etiqueta la utilizaremos cuando queramos que otra ruta de camel utilice nuestro mensaje actual pero no modifique los valores del original. Es decir, se clonaría el mensaje, uno seguiría el flujo principal de la ruta mientras que el otro es enviado a otra ruta dentro de camel y cualquier cambio que se realice sobre él, no afectará al mensaje original.
+Esta etiqueta la utilizaremos cuando queramos que otra ruta de camel utilice nuestro mensaje actual pero no modifique los valores del original. Es decir, se clonaría el mensaje, uno seguiría el flujo principal de la ruta mientras que el otro es enviado a otra ruta dentro de camel y cualquier cambio que se realice sobre él, no afectará al mensaje original. Esto es debido a que este tipo de `tag` es de tipo `fire and forget` y el patrón de intercambio que utiliza es `in only`
 
 ```xml
 <wireTap id="guardarCacheTo" uri="direct:guardarCacheBD"/>
 ```
 
-La pripiedad `uri` de esta etiqueta define hacia donde se debe dirigir la información clonada.
+La propiedad `uri` de esta etiqueta define hacia donde se debe dirigir la información clonada.
 
 ### Detener la propagación (`stop`)
 

@@ -722,7 +722,7 @@ En este caso estamos creando una variable que posee los parámetros de conexión
 
 > Antes de continuar con la documentación, probamos el proyecto y nos dio un error de certificados: [error_03](#errors)
 
-Terminada la importación y declarar la variable de configuración podemos comenzar a crear la instancia de acceso a la base de datos. Para hacer la conexión reusable, implementamos el patrón singleton. Además utilizaremos la variable de entorno `IS_OFFLINE` para no cambiar nuestro código de producción a desarrollo; esa variable de entorno se encargará de ello por nosotros ya que en dependencia de cómo iniciemos serverless, su valor será `true` o `false`.
+Terminada la importación y declarar la variable de configuración podemos comenzar a crear la instancia de acceso a la base de datos. Para hacer la conexión reusable, implementamos el patrón singleton. Además utilizaremos la variable de entorno `IS_OFFLINE` (variable de contexto de serverless) para no cambiar nuestro código de producción a desarrollo; esa variable de entorno se encargará de ello por nosotros ya que en dependencia de cómo iniciemos serverless, su valor será `true` o `false`.
 
 ```js
 let connection = null;
@@ -1419,19 +1419,337 @@ Estas funciones se basan en el concepto de máquinas de estado finitas, donde se
 
 Firma: Chat GPT
 
-Para este apartado vamos a instalar la siguiente dependencia:
-- `serverless-step-functions-offline`
-
-También probaremos la siguiente dependencia:
+Comencemos instalando la siguiente dependencia para el desarrollo:
 - `serverless-step-functions-local`
 - `serverless-step-functions` (Debe instalarse también)
 - `serverless-offline-lambda` (Debe instalarse también)
+- `@aws-sdk/clinet-sfn` Para poder acceder a las step functions de aws
 
-Comencemos por la primera dependencia `serverless-step-functions-offline`:
+> Para instalar recuerde que debe utilizar:
+> - npm install paquete --dev-save
+> - yarn add paquete -D
 
-> Buscando información
+Una vez instalada podemos dar comienzo a la creación de las stepFunctions y que mejor manera de aprender que mostrando un ejemplo. Partamos de la estructura de carpetas que se seguirá esta parte del tutorial:
 
-## Comunicación entre lambdas (`message broker`)
+![Carpeta de las step functions](./assets/step_functions_folder.png)
+
+La idea es almacenar en la carpeta `stepFunctions` todos los ejemplos que vamos a utilizar. Dentro de la misma, para mayor comodidad, vamos a dividir las funcionalidades en dos archivos:
+
+- `steps.js` -> En este archivo vamos a guardar las funciones que forman parte de los *steps functions*.
+- `stepFunctions.js` -> Aqui pondremos todas los `stepsFunctions` que creemos para el proyecto.
+
+Veamos los códigos dentro de `steps.js`:
+
+```js
+const initial = (event, context, callback) => {
+    console.log('inside initial function')
+    console.log(event)
+    return {location: "initial"}
+}
+
+const middle = (event, context, callback) => {
+    console.log('inside middle function')
+    console.log(event)-
+    return {location: "middle"}
+}
+
+const middle2 = (event, context, callback) => {
+    console.log('inside middle2 function')
+    console.log(event)
+    return {location: "middle2"}
+}
+
+const final = (event, context, callback) => {
+    console.log('inside final function')
+    console.log(event)
+    return {location: "final"}
+}
+```
+
+Aquí vemos la declaración básica de algunas funciones que representan los diferentes estados por lo que pasará la `stepFunction`. Es decir, tenemos una función que siempre va a ser la inicial y otra que será siempre la final; pero agregamos dos funciones intermediarias que veremos más adelante su uso. Ahora pasemos a ver el archivo de `stepFunctions`: 
+
+```js
+const StepFunctions = require('../config/stepFunctionConfig').StepFunctions;
+
+module.exports.startStepFunction = async (event, context, callback) => {
+    const stepFunc = new StepFunctions();
+    stepFunc.setFunc("arn:aws:states:us-east-1:101010101010:stateMachine:WaitMachine");
+    console.log("here")
+    return await stepFunc.getClient().send(stepFunc.getCommand())           
+            .then((data) => { 
+                console.log('here 2')   
+                console.log(data)   
+                callback(null, `Your state machine executed   successfully`)  
+            })
+            .catch(error => {  console.log(error)   ;  callback(error);  });
+}
+```
+
+Este archivo posee la función que inicia la cadena de `StepsFunctions`. Es bastante similar a una función normal, la diferencia consiste en el desencadenamiento de las `stepFunctions` y la forma de devolver los datos. Destripemos las líneas de código:
+
+```js
+const stepFunc = new StepFunctions();
+stepFunc.setFunc("arn:aws:states:us-east-1:101010101010:stateMachine:WaitMachine");
+```
+
+Ese fragmento tiene como función crear una instancia de una clase de configuración que veremos más adelante. El propósito de esta clase es crear la instancia de la clase encargada de realizar todo el procedimiento de llamado a las `step functions`.
+
+```js
+await stepFunc.getClient().send(stepFunc.getCommand())      
+```
+
+Esta parte del código tiene de los dos lados:
+- `stepFunc.getClient()` -> pertrenece a la clase de configuración y lo veremos más adelante. Su función es obtener el cliente de conexión.
+- `stepFunc.getCommand()` -> similar al anterior, pero su función es obtener el archivo de configuración de la llamada.
+- `.send(...)` -> Esta función ya es propia de la librería que estamos usando `@aws-sdk/client-sfn`. Su función es ejecutar la máquina de estado (`stepFunction`) declarada en el archivo `serverless.yml` (se ejecuta la que coincida con el nombre pasado por parámetros).
+
+```js
+.then((data) => { 
+              console.log('here 2')   
+              console.log(data)   
+              await callback(null, `Your state machine executed   successfully`)
+              return data;  
+          })
+          .catch(error => {  console.log(error)   ;  callback(error);  });
+```
+
+La función `send(...)` es una promesa, por lo que hay dos formas de trabajar con ellas. La primera es usando el `await` delante, pero deberíamos guardar en una variable el resultado. La segunda es utilizando el operador `then` que me permite ejecutar una serie de algoritmos una vez recibida la respuesta de la promesa. En nuestro caso utilizamos una tercera variante, `await` con `then`; esta funciona esperando a la respuesta que debe devolver el then y posteriormente esa respuesta se puede o devolver en el flujo principal o almacenar en una variable.
+
+En nuestro caso el `then` es bastante básico, un par de `console.logs` para comprobar que accedimos y otro para imprimir los datos recibidos en pantalla. Seguido, tenemos un `callback` que nos permite utilizar el parámetro `callback` de la función lambda. Su objetivo es mostrar un resultado mediante respuesta HTTP.
+
+El `then` puede usarse anidado, o sea, `then().then()`, pero nunca puede faltar el `.catch()` al final, ya que si existe algún error en el flujo, este último se encargará de procesarlo.
+
+Veamos ahora el archivo de configuración:
+
+```js
+const { SFNClient, StartExecutionCommand  } = require('@aws-sdk/client-sfn');
+
+function StepFunctions(){
+            if(this._client == null){
+                this._func = null;
+                this._input = null;
+            this._client = new SFNClient({
+            region: "eu-east-1", 
+            disableHostPrefix: true,
+            endpoint: 'http://localhost:8083', 
+            credentials: {
+                accessKeyId: 'TU_ACCESS_KEY_ID',
+                secretAccessKey: 'TU_SECRET_ACCESS_KEY',
+            }
+            });     
+        }       
+}
+
+StepFunctions.prototype.setFunc = function setFunc(fun) {
+            this._func = fun;
+};
+
+StepFunctions.prototype.setInput = function  setInput(input){
+        this._input = input;
+    };
+
+StepFunctions.prototype.getCommand = function getCommand(){
+        if(this._func == null){
+            throw "La funcion no fue definida en el step function"
+        }
+        const params = {           
+            stateMachineArn: this._func,
+          }
+
+        console.log(params);
+        const command = new StartExecutionCommand(params);
+        return command;
+    };
+
+StepFunctions.prototype.getClient = function getClient(){
+    return this._client;
+}
+
+module.exports.StepFunctions = StepFunctions;
+```
+
+¿Bastante feo verdad? Aunque lo llamemos clase, en esta versión de javascript ese concepto no está totalmente bien concebido, por lo que una clase no pasa más de una función con funciones dentro. En este caso, para declarar una clase debemos seguir un comportamiento algo destructivo:
+
+```js
+function StepFunctions(){
+            if(this._client == null){
+                this._func = null;
+                this._input = null;
+            this._client = new SFNClient({
+            region: "eu-east-1", 
+            disableHostPrefix: true,
+            endpoint: 'http://localhost:8083', 
+            credentials: {
+                accessKeyId: 'TU_ACCESS_KEY_ID',
+                secretAccessKey: 'TU_SECRET_ACCESS_KEY',
+            }
+            });     
+        }       
+}
+```
+
+La primera función representa el constructor de la clase. Dentro podemos ver como se crean las variables que se estarán utilizando posteriormente por los métodos que le iremos añadiendo. Este enfoque es un poco similar a `python`, esto se debe a que no tenemos declaración de variables como se realizan en las clases, simplemente utilizamos el `this.nombreDeMiVariable` en el constructor para definirlas. De esta forma, cualquier función que añadamos a partir de aquí, podrá usar dichos atributos.
+
+```js
+StepFunctions.prototype.setFunc = function setFunc(fun) {
+            this._func = fun;
+};
+```
+
+Para añadirle métodos a nuestra "clase", debemos utilizar la propiedad prototype de nuestra función principal. Esta nos permite añadir "comportamientos" extras a una función. En este caso estamos declarando la función `setFunc` dentro de nuestra "clase" y asignandole otra función, si se desea, también se puede crear una `arrow function`.
+
+```js
+StepFunctions.prototype.getCommand = function getCommand(){
+        if(this._func == null){
+            throw "La funcion no fue definida en el step function"
+        }
+        const params = {           
+            stateMachineArn: this._func,
+          }
+
+        console.log(params);
+        const command = new StartExecutionCommand(params);
+        return command;
+    };
+```
+
+Por último, les quiero mostrar la función encargada de crear el comando para la ejecución de los `stepFunctions`. Como pueden ver declaramos una variable con los parámetros a utilizar; en este caso solo definimos `stateMachineArn` que hace referencia el `arn` de la stepFunction declarada en `serverless.yml`. La variable `_func` se encarga de almacenar dicho valor que debe ser añadido mediante `setFunc`. Posteriormente, se crea la instancia de `StartExecutionCommand`, encargado de crear los puntos de acceso interno a nuestra máquina de estados.
+
+¿Vuelvo a repetir, bien feo no? Esto se debe a que serverless utiliza por defecto `ES5` que es el estandar de codificación de js. Actualmente js se rige por el estandar `ES6`, pero para poder utilizarlo dentro de nuestros scripts de `serverless`, debemos instalar la siguiente dependencia:
+
+```bash
+npm install --save-dev serverless-bundle
+
+# o
+
+yarn add -D serverless-bundle
+```
+
+> Si usamos este plugin, debemos añadir lo siguiente en nuestro archivo `serverless.yml`
+> ```
+> plugins:
+>  - serverless-bundle
+>```
+>
+> Para más información, visite: https://github.com/AnomalyInnovations/serverless-bundle
+
+Con esta dependencia ya instalada, podemos crear clases de la forma que bien conocimos y podemos quitarnos de arriba el `module.exports.name` y simplemente poner `export cont a = 5` por ejemplo. Antes de terminar, nos falta por ver la configuración realizada en el archivo `serverless.ym;` y agregar un par de líneas al `package.json`. Comencemos por nuestro `serverless`:
+
+```yml
+service: crud-dynamo
+frameworkVersion: '3'
+
+provider:
+  #...
+
+plugins:
+  #...
+  - serverless-step-functions-local 
+  - serverless-step-functions 
+  - serverless-offline-lambda
+  - serverless-offline # Este siempre tiene que ser el útlimo
+
+custom:
+  # Se ponen seguidos ya que los dos poseen la misma configuración
+  serverless-offline: # Configuración de las dependencias de serverless offline
+  stepFunctionsLocal: # Configuración de las step functions
+    accountId: 101010101010 # Dummy acount id
+    region: us-east-1 # Dummy region
+    TaskResourceMapping: # Mapeo de las funciones a utilizar en los steps. Esto es solo para serverless offline
+      FirstState: arn:aws:lambda:us-east-1:101010101010:function:initial # arn de la función. El nombre completo que recibe en aws
+      FinalState: arn:aws:lambda:us-east-1:101010101010:function:final
+
+functions:
+# Declaramos todas las funciones del step functions aqui.
+  initial:
+    handler: ./stepFunctions/steps.initial
+    events:
+      - httpApi:
+          path: /initial
+          method: get
+  middle:
+    handler: ./stepFunctions/steps.middle
+    events:
+      - httpApi:
+          path: /middle
+          method: get
+  middle2:
+    handler: ./stepFunctions/steps.middle2
+    events:
+      - httpApi:
+          path: /middle2
+          method: get
+  final:
+    handler: ./stepFunctions/steps.final
+    events:
+      - httpApi:
+          path: /final
+          method: get
+  startStepFunction:
+    handler: ./stepFunctions/stepFunction.startStepFunction
+    events:
+      - httpApi:
+          path: /stepFunction
+          method: get
+  
+  # La stepFunction es una función normal que se debe declarar para acceder a ella desde un endpoint
+
+  # Ahora declaramos la forma que va a seguir nuestra stepfunction
+
+stepFunctions: # Declaración del step functions
+  stateMachines: # Declaración de la máquina de estados
+    WaitMachine: # Nombre de la máquina de estados
+      definition:
+        Comment: "Ejemplo de step function" # Comentario
+        StartAt: FirstState # Estado inicial, se declara en los states
+        States:    
+          FirstState: # Primer estado
+            Type: Task # Tipo de estado, tarea hace referencia a la función
+            Resource: # Recursos a utilizar en el primer estado
+              Fn::GetAtt: [initial, Arn] # Fn::GetAtt permite ejecutar una función dentro del yml para capturar una configuración ya existente mediante atributos pasados por []
+            Next: WaitUsingSeconds # Proximo estado   
+          WaitUsingSeconds:
+            Type: Wait # Funcion de espera cronometrada
+            Seconds: 5 # Tiempo de espera
+            Next: FinalState     
+          FinalState:
+            Type: Task
+            Resource: # Recursos a utilizar en el primer estado
+              Fn::GetAtt: [final, Arn] # Fn::GetAtt permite ejecutar una función dentro del yml para capturar una configuración ya existente mediante atributos pasados por []
+            Next: EstadoDeExito
+          EstadoDeExito:
+            Type: Succeed
+```
+
+En el mismo código se explica que significa cada elemento, por lo que no es necesario realizar una explicación detallada de cada paso. La idea en general es la siguiente:
+- Declaramos nuestras máquinas de estado debajo de `stateMachines`
+- Cada máquina de estado posee una definición `definition`
+- Dentro de la definición debemos declarar los siguientes datos:
+  - Estado inicial mediante `StartAt`. Debe ser uno de los estados declarados
+  - La lista de nuestros estados mediante `States`
+  - Por cada estado:
+    - Un nombre, por ejemplo `FirstState`
+    - Un tipo mediante `Type`. Para más información de los tipos disponible, vea https://docs.aws.amazon.com/step-functions/latest/dg/concepts-states.html o para un resumen, dirigase a [tipos de step functions](#step-functions-type)
+    - La propiedad siguiente depende del `type` seleccionado.
+    - Próximo estado en la cadena mediante `next`
+
+De esta forma ya tenemos declarado nuestra máquina de estado. Para ver ejemplos de otros tipos de máquina de estado (otros types aparte de los vistos anteriormente), puede dirigirse al link anterior o al siguiente repositoirio de github: https://github.com/richlloydmiles/serverless-step-functions-local-example.
+
+Ahora veamos las dos líneas de código a añadir en `package.json`:
+
+```json
+"scripts": {
+  "delete": "aws stepfunctions --endpoint-url http://localhost:8083 delete-state-machine --state-machine-arn 'arn:aws:states:us-east-1:101010101010:stateMachine:WaitMachine' &",
+  "start": " serverless offline start --stage local-dev"
+}
+```
+
+La primera nos permite eliminar (de forma manual) una máquina de estado ya creada. Esto se debe a que es posible que cuando ejecute el segundo comando `start`, encargado de inicializar el step functions y serverless, surja el error [State Machine Already Exists](#error-08).
+
+> Cuando ejecutemos por primera vez el comando `start`, tengamos paciencia, ya que se deben descargar `500 mb` en archivos. 
+
+> Para esta sección debemos las pruebas, ya que la máquina de estado se rompe después de la ejecución del primer lambda. Todo apunta a que es un error de la librería, en caso de solucionarlo, se agregará a este documento
+     
 
 
 # Comandos
@@ -1451,10 +1769,10 @@ Comencemos por la primera dependencia `serverless-step-functions-offline`:
 
 # Bibliografia
 
-### Pagina Oficial
+### Página Oficial
 - https://www.serverless.com/
 
-### Instalacion
+### Instalación
 - https://www.enmilocalfunciona.io/aprendiendo-serverless-framework-parte-2-instalacion/
 
 ### Deploy
@@ -1465,10 +1783,11 @@ Comencemos por la primera dependencia `serverless-step-functions-offline`:
 
 ### Step Functions
 - https://www.npmjs.com/package/@vibou/serverless-step-functions-offline
--https://medium.com/atheneum-partners-digitalization/how-to-run-serverless-step-functions-offline-26b7b994d2b5&ved=2ahUKEwjW89_z4qyBAxXWlIkEHYxBB5EQFnoECBYQAQ&usg=AOvVaw37w8fSu-cmClkfvrjd3DxR
+- https://medium.com/atheneum-partners-digitalization/how-to-run-serverless-step-functions-offline-26b7b994d2b5
 
 ### Ejemplos Online
 - https://github.com/serverless/examples
+- https://github.com/richlloydmiles/serverless-step-functions-local-example
 
 ### DynamoDb
 - https://www.serverless.com/plugins/serverless-dynamodb-local
@@ -1496,6 +1815,9 @@ Comencemos por la primera dependencia `serverless-step-functions-offline`:
 - https://hackernoon.com/a-crash-course-on-serverless-with-node-js-632b37d58b44
 - https://medium.com/@dan.avila7/prueba-tus-proyectos-serverless-de-forma-local-con-serverless-offline-2e555f2b5e9b
 - https://devopscube.com/serverless-framework-tutorial/
+
+### ES6 en lambda
+- https://github.com/AnomalyInnovations/serverless-bundle
 
 # Errors
 
@@ -1636,6 +1958,41 @@ Comencemos por la primera dependencia `serverless-step-functions-offline`:
 >    }
 > ```
 
+#### Error 07
+
+> **Problema**
+>
+> `[504] - Lambda timeout`
+>
+> **Esto no es recomendado**
+> 
+> **Solucion**
+> Este error se debe a que las funciones lambdas por defecto poseen un timeout pequeño. Este problema se resuelve modificando en el archivo `serverless.yml` la declaración del lambda.
+>
+>``` yml
+> provider:
+>    #...
+>    memorySize: 512 # Esto nos permite declarar el tamaño de memoria global que tendran los lambda
+>    timeout: 50 # Nos permite delcarar el tiempo de espera global de los lambda
+>   
+> functions:
+>    custom_timeout: #will override the default timeout
+>       handler: handler.custom_memory
+>       timeout: 30 # En este caso estamos diciendo que para esta función el tiempo de espera será 30.  
+> ```
+
+#### Error 08
+
+> **Problema**
+>
+> `StateMachineAlreadyExists: State Machine Already Exists: 'arn:aws:states:us-east-1:101010101010:stateMachine:WaitMachine'`
+>
+> 
+> **Solucion**
+> Ejecutar:
+> - npm run delete
+> - yarn delete
+> En ambos casos, el servidor debe estar ejecutandose
 # Estructura de la variable event (Llamada http):
 ```js
 {
@@ -1806,3 +2163,13 @@ module.exports = class Logs {
   }
 }
 ```
+
+# Step functions type
+
+- `Task`: Llamar funciones propias
+- `Choice`: Para elegir un camino en dependencia de un valor
+- `Fail o Succeed`: Definir un camino final de existo o no.
+- `Pass`: Enviar datos al flujo del step function
+- `Wait`: Declarar tiempo de espera
+- `Parallel`: Ejecutar flujos en paralelos
+- `Map`: Iterar sobre los steps
