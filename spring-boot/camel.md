@@ -74,7 +74,35 @@ from(source) // Este es el consumidor, el que permite disparar una ruta
 - https://reflectoring.io/spring-camel/
 - http://www.masterspringboot.com/camel/apache-camel-rest-example-for-beginners/
 
+## Links de interes
+- [Crear wsdl](./wsdl.md)
+
+# Errors
+
+## Error 01
+
+**Problema**
+
+Instalé el eclipse y cuando lo vuelvo a abrir apunta a java 8 y se supone que tiene que correr con el java 17.
+
+**Solución**
+
+Buscar el archivo `eclipse.ini`, en mi caso estaba aquí C:\Users\Samu\eclipse\java-2023-09\eclipse. Agregar las dos siguientes líneas:
+
+```text
+-vm
+C:/Program Files/Java/jdk-11.0.13+8/bin
+```
+
+`C:/Program Files/Java/jdk-11.0.13+8/bin` apunta a la carpeta bin de tu archivo java
+
 # Anotaciones
+
+## Eclipse
+
+Para trabajar con los archivos wsdl de forma más sencilla podemos migrar a eclipse. Aquí tengan en cuenta que deben instalar Java EE de eclipse y no el Java normal. Ya que el primero posee los plugins necesarios para el trabajo con WSDL y el segundo no.
+
+Para indagar más sobre como trabajar con wsdl y eclipse, vea la sección [links de interes](#links-de-interes)
 
 ## Formas de las rutas
 
