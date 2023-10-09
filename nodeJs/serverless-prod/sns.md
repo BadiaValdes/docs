@@ -364,4 +364,4 @@ Pues ya, esto esto es todo, así de fácil es utilizar el SNS de `aws` para la c
 
 En todo lo  visto anteriormente, intentamos explicar la forma de utilizar `SNS` para la comunicación entre diferentes funciones `lambdas`. Ahora queremos ir un paso más lejos y enviar correos electrónicos mediante `SES` (simple email service). Para ello vea el documento [SES.md](./ses.md)
 
-# Nuestro ejemplo
+# Nuestro ejemplo 
