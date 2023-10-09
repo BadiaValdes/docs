@@ -1,6 +1,6 @@
 # Step Functions
 
-> Para este tutorial se asume que posee conocimiento basico de aws. Si desea comenzar a aprender desde cero, puede ver el tutorial [Serverless](https://github.com/BadiaValdes/docs/blob/doc/nodeJs/serverless.md)
+> Para este tutorial se asume que posee conocimiento básico de aws. Si desea comenzar a aprender desde cero, puede ver el tutorial [Serverless](https://github.com/BadiaValdes/docs/blob/doc/nodeJs/serverless.md)
 
 Las Step Functions en AWS son un servicio de orquestación de flujo de trabajo sin servidor que permite coordinar y secuenciar múltiples servicios de AWS, así como también servicios externos, para crear aplicaciones escalables y resilientes. 
 
@@ -44,13 +44,13 @@ Al presionar sobre el mismo, AWS nos preguntará que plantilla queremos utilizar
 
 ![Step function template](./assets/step-function-template.png)
 
-En nuestro caso usaremos la primera opción (`Blanck` o `Vacia`). Una vez seleccionada la plantilla a utilizar, presionamos el botón select en la esquina inferior derecha. Esta acción nos mostrará un panel donde podremos realizar el diseño visual de nuestra `step function`:
+En nuestro caso usaremos la primera opción (`Blanck` o `Vacía`). Una vez seleccionada la plantilla a utilizar, presionamos el botón select en la esquina inferior derecha. Esta acción nos mostrará un panel donde podremos realizar el diseño visual de nuestra `step function`:
 
 ![Step Function GUI](./assets/step-function-gui.png)
 
 ## Trabajando con la gui
 
-Vamos a ver las diferentes partes que componen la interfáz de creación de `Step functions`:
+Vamos a ver las diferentes partes que componen la interfaz de creación de `Step functions`:
 
 - Parte superior
 
@@ -62,7 +62,7 @@ Aquí encontraremos:
 
 ![Step function name](./assets/step-function-name.png)
 
-> Si presionamos el icono del lapiz, podemos cambiar el nombre de nuestra función.
+> Si presionamos el icono del lápiz, podemos cambiar el nombre de nuestra función.
 
 1. Modos de trabajo
 
@@ -78,7 +78,7 @@ El tercer modo es de configuración. Nos permite modificar algunos valores como 
 - Los logs. En este caso definimos el nivel de los logs que queremos enviar el cloud watch.
 - Información adicional como tags.
 
-Este es un ejemplo de configuración de una step function fincional:
+Este es un ejemplo de configuración de una step function funcional:
 
 ![Conf Step Functions](./assets/step-function-config-example.png)
 
@@ -92,7 +92,7 @@ En esta zona podemos encontrar todos los componentes para la creación de nuestr
 
 - Zona Central
 
-Vista anteriormente, esta zona es la encargada de mostrarnos como va quedando nuestra `Step function` de forma visual. En un inicio solo posee el estado de **inicio** y **final**. Si queremos añadir un componente, seleccionamos de la **zona** **izquierda** (en este caso lambda) y la arrastramos a algun espacio libre dentro del flujo:
+Vista anteriormente, esta zona es la encargada de mostrarnos como va quedando nuestra `Step function` de forma visual. En un inicio solo posee el estado de **inicio** y **final**. Si queremos añadir un componente, seleccionamos de la **zona** **izquierda** (en este caso lambda) y la arrastramos a algún espacio libre dentro del flujo:
 
 ![Initial State](./assets/state-machine-initial.png)
 
@@ -100,7 +100,7 @@ Vista anteriormente, esta zona es la encargada de mostrarnos como va quedando nu
 
 - Zona Derecha
 
-En este lugar encontraremos las configuraciones de nuestros componentes. Por ejempolo, veamos como configurar nuestro componente `lambda`:
+En este lugar encontraremos las configuraciones de nuestros componentes. Por ejemplo, veamos como configurar nuestro componente `lambda`:
 
 ![Component configuration](./assets/component-configuration.png)
 
@@ -133,7 +133,7 @@ En este apartado, podemos filtrar los datos de entrada que provengan de los esta
 
 1. `Output` o `Salida`
 
-Similar al anterior, pero en este caso podemos filtrar los datos de salida de nuestro componente acutal.
+Similar al anterior, pero en este caso podemos filtrar los datos de salida de nuestro componente actual.
 
 1. `Error Handling` o `Manejador de errores`
 
@@ -174,14 +174,14 @@ Dentro podemos encontrar:
 ![Actions](./assets/step-function-action-details.png)
 
 1. `Edit` o `Editar`: Nos permite volver a la pantalla de diseño de las `Step functions`
-1. `Actions` o `Acciones`: De manera similar al vsito anteriormente, podemos seleccionar como exportar nuestra `step function`
+1. `Actions` o `Acciones`: De manera similar al visto anteriormente, podemos seleccionar como exportar nuestra `step function`
 1. `Start Execution` o `Iniciar ejecución`: Nos permite ejecutar nuestra función.
 
-Si presionamos esta útlima opción, nos aparece la siguiente ventana:
+Si presionamos esta última opción, nos aparece la siguiente ventana:
 
 ![Step Function Execute](./assets/step-function-execute.png)
 
-Dentro, podemos definir el nombre de nuesta ejecución (para identificarla). Si queremos que la fución se ejecute de forma sincrona o asíncrona y por último los datos de entrada para nuestra `Step function`. Presionamos `Start function` y pasaremos a una nueva ventana donde se nos mostrará la ejecución de nuestra función (Resultado e información adicional):
+Dentro, podemos definir el nombre de nuestra ejecución (para identificarla). Si queremos que la función se ejecute de forma sincrona o asíncrona y por último los datos de entrada para nuestra `Step function`. Presionamos `Start function` y pasaremos a una nueva ventana donde se nos mostrará la ejecución de nuestra función (Resultado e información adicional):
 
 ![Step function extra info](./assets/step-function-extra-info.png)
 
@@ -192,7 +192,7 @@ Dentro, podemos definir el nombre de nuesta ejecución (para identificarla). Si 
 Dentro de las informaciones específicas de nuestra `Step function` tenemos los siguientes `tabs`:
 
 1. `Execution`: Vista en la imagen anterior, nos brinda información de las ejecuciones de nuestra función.
-2. `Monitoring`: Nos permite ver métricas sobre nuestra `Step function`. Las métricas varian entre cantidad de veces ejecutadas hasta cuantas veces se ejecutó de forma satisfactoria.
+2. `Monitoring`: Nos permite ver métricas sobre nuestra `Step function`. Las métricas Varian entre cantidad de veces ejecutadas hasta cuantas veces se ejecutó de forma satisfactoria.
 ![Step function monitoring](./assets/step-monitoring.png)
 3. `Logging`: Nos permite ver todos los logs generados por las funciones dentro de `Step Function`
 ![Step function logging](./assets/step-function-monitoring.png)
@@ -202,5 +202,5 @@ Dentro de las informaciones específicas de nuestra `Step function` tenemos los 
 ![Step function alias](./assets/step-function-alias.png)
 6. `Versions`: Permite crear versiones de una step function.
 ![Step function version](./assets/step-function-version.png)
-7. `Tags`: Nos permite asiganar etiquetas a nuestras `Step functions` para poseer un acceso y filtrado rápido.
+7. `Tags`: Nos permite asignar etiquetas a nuestras `Step functions` para poseer un acceso y filtrado rápido.
 ![Step functions tags](./assets/step-function-tags.png)
