@@ -45,8 +45,8 @@
 1. [Middlewares y manejo de errores](#middlewares-y-manejo-de-errores)
 1. [Logs](#logs)
 1. [Comandos](#comandos)
-1. [Proyectos de interes](#proyectos-de-interes)
-1. [Bibliografia](#bibliografia)
+1. [Proyectos de interés](#proyectos-de-inter%C3%A9s)
+1. [Bibliografía](#bibliograf%C3%ADa)
 1. [Errors](#errors)
     1. [Error 1](#error-01)
     1. [Error 2](#error-02)
@@ -54,7 +54,7 @@
     1. [Error 4](#error-04)
     1. [Error 5](#error-05)
 1. [Estructura de la variable event (Llamada http)](#estructura-de-la-variable-event-llamada-http)
-1. [Codigo alternativo](#codigo-alternativo)
+1. [Código alternativo](#c%C3%B3digo-alternativo)
     1. [Update variante 1](#update-item-1)
     1. [Update variante 2](#update-item-2)
 
@@ -68,7 +68,7 @@ Serverless es un modelo de computación en la nube en el que el proveedor de la 
     - (windows) https://github.com/coreybutler/nvm-windows
     - (Linux) https://github.com/nvm-sh/nvm
     - (mac) https://tecadmin.net/install-nvm-macos-with-homebrew/
-- serverles
+- serverless
   - `npm install -g serverless`
 
 ## Creando un proyecto
@@ -179,7 +179,7 @@ module.exports.handler = async (event) => {
 ```
 - `module.exports`: nos permitirá exportar un arrow function que será usado en el serverless.yml para llamar la función a acceder desde el navegador.
 - `event`: posee una serie de datos del evento que desencadenó la función.
-- `return`: debe ser un json con la estructura statusCode y body. Se pueden agregar más cosas pero esas dos son las escenciales.
+- `return`: debe ser un json con la estructura statusCode y body. Se pueden agregar más cosas pero esas dos son las esenciales.
 
 ## Como iniciar nuestra app
 
@@ -199,7 +199,7 @@ Ahora vamos a probar la función creada por defecto en nuestra aplicación serve
 
 Como podemos observar, el cuadro amarillo nos dice los `endpoints` o puntos de acceso http disponibles. Estos puntos vienen en pares (el tipo de petición y uno de tipo POST - el segundo siempre), nosotros utilizaremos el primero para realizar las llamadas http; en este caso estamos hablando de `http://localhost:3000/`.
 
-Conociendo esta información podemos ir directamente a realizar la llamada `http`. Para este caso decidimos utilizar `Postman`, pero sientete libre de usar cualquier otro software como `Insomnia` o llamadas mediante consola con `curl`.
+Conociendo esta información podemos ir directamente a realizar la llamada `http`. Para este caso decidimos utilizar `Postman`, pero siéntete libre de usar cualquier otro software como `Insomnia` o llamadas mediante consola con `curl`.
 
 Para la llamada de postman seleccionaremos el método `GET` y como url `http://localhost:3000/`:
 
@@ -236,8 +236,8 @@ updateItem:
   handler: ./item/update.updateItem
   events: # Que eventos se pueden realizar
       - httpApi: # Eventos tipos http
-          path: /items/{id} # Path de acceso al evento. El {id} es la variable que se obtiene mediante la url (PathParametter)
-          method: put # Metodo que acepta el evento http
+          path: /items/{id} # Path de acceso al evento. El {id} es la variable que se obtiene mediante la url (PathParameter)
+          method: put # Método que acepta el evento http
 deleteItem:
   handler: ./item/delete.deleteItem
   events:
@@ -246,7 +246,7 @@ deleteItem:
         method: delete
 ```
 
-La diferencia con el enpdoint base visto en el apartado anterior radica en el update; específicamente en path, donde podemos observar el uso de `{id}`. Esto hace referencia a una variable de path, accesible mediante la variable event en la función. Veamos entonces como quedó el archivo `serverless.yml` después de agregar la información anterior:
+La diferencia con el endpoint base visto en el apartado anterior radica en el update; específicamente en path, donde podemos observar el uso de `{id}`. Esto hace referencia a una variable de path, accesible mediante la variable event en la función. Veamos entonces como quedó el archivo `serverless.yml` después de agregar la información anterior:
 
 ```yml
 service: serverless-api-project
@@ -268,7 +268,7 @@ functions:
     events: # Que eventos se pueden realizar
       - httpApi: # Eventos tipos http
           path: /items/ # Path de acceso al evento
-          method: get # Metodo que acepta el evento http
+          method: get # Método que acepta el evento http
   createItem:
     handler: ./item/create.createItem
     events:
@@ -279,8 +279,8 @@ functions:
     handler: ./item/update.updateItem
     events: # Que eventos se pueden realizar
         - httpApi: # Eventos tipos http
-            path: /items/{id} # Path de acceso al evento. El {id} es la variable que se obtiene mediante la url (PathParametter)
-            method: put # Metodo que acepta el evento http
+            path: /items/{id} # Path de acceso al evento. El {id} es la variable que se obtiene mediante la url (PathParameter)
+            method: put # Método que acepta el evento http
   deleteItem:
     handler: ./item/delete.deleteItem
     events:
@@ -390,36 +390,36 @@ module.exports.deleteItem = async (event) =>  {
 
 Ahora pasemos a la parte divertida. Vamos a probar si nuestros `endpoints` están funcionando correctamente. Comencemos iniciando el servidor `serverless offline`:
 
-![Serverles start multi enpdoints](./assets/serverless_start_multi_endpoint.png)
+![Serverless start multi endpoints](./assets/serverless_start_multi_endpoint.png)
 
-> Como agregamos más `enpoints` al apartado de `functions` dentro de `serverles.yml`, el recuadro es mucho más grande comparado con el visto anteriormente.
+> Como agregamos más `endpoints` al apartado de `functions` dentro de `serverless.yml`, el recuadro es mucho más grande comparado con el visto anteriormente.
 
 Comencemos con la llamada al endpoint create:
 
 - Petición:
-![peticion de creación de item](./assets/peticion_item_crear.png)
+![petición de creación de item](./assets/peticion_item_crear.png)
 - Respuesta:
 ![respuesta de creación de item](./assets/respuesta_creacion_item.png)
 
 El siguiente es el listar:
 - Petición:
-![peticion de busqueda de items](./assets/peticion_buscar_items.png)
+![petición de búsqueda de items](./assets/peticion_buscar_items.png)
 - Respuesta:
-![respuesta de busqueda de items](./assets/respuesta_busqueda_items.png)
+![respuesta de búsqueda de items](./assets/respuesta_busqueda_items.png)
 
 Pasemos al update:
 - Petición:
-![peticion de actualizar item](./assets/peticion_update_item.png)
+![petición de actualizar item](./assets/peticion_update_item.png)
 - Respuesta:
 ![respuesta de actualizar item](./assets/respuesta_actualizar_item.png)
 
 Terminemos con el delete:
 - Petición:
-![peticion de eliminar item](./assets/peticion_eliminar_item.png)
+![petición de eliminar item](./assets/peticion_eliminar_item.png)
 - Respuesta:
 ![respuesta de eliminar item](./assets/respuesta_eliminar_item.png)
 
-> Debemos aclarar que hicimos un poco de trampa en las pruebas. Todas las pruebas realizadas estaban utilizando una `base de datos`. Mencionamos esto debido a que pueden pensar que la variable `item` (global) almacenaría toda la información de los items que creemos. Pero tristemente no es así. Cuando un `lambda` se deja de ejecutar automaticamente se cierra el proceso (archivo ejecutado), por lo tanto, los datos almacenados en variables son eliminados.
+> Debemos aclarar que hicimos un poco de trampa en las pruebas. Todas las pruebas realizadas estaban utilizando una `base de datos`. Mencionamos esto debido a que pueden pensar que la variable `item` (global) almacenaría toda la información de los items que creemos. Pero tristemente no es así. Cuando un `lambda` se deja de ejecutar automáticamente se cierra el proceso (archivo ejecutado), por lo tanto, los datos almacenados en variables son eliminados.
 
 ## Serverless con dynamo
 
@@ -489,7 +489,7 @@ custom:
       heapMax: 1g # Máximo tamaño que puede alcanzar la memoria de dynamo db
       migrate: true # realizar las migraciones por defecto
       seed: true # Utilice una semilla para poblar la bd
-      convertEmptyValues: true # Convertir los valores vacios a null
+      convertEmptyValues: true # Convertir los valores vacíos a null
 ``` 
 
 Quedando de la siguiente forma el archivo `serverless.yml`:
@@ -518,7 +518,7 @@ custom:
       heapMax: 1g # Máximo tamaño que puede alcanzar la memoria de dynamo db
       migrate: true # realizar las migraciones por defecto
       seed: true # Utilice una semilla para poblar la bd
-      convertEmptyValues: true # Convertir los valores vacios a null
+      convertEmptyValues: true # Convertir los valores vacíos a null
   
 functions:
   #...
@@ -631,7 +631,7 @@ custom:
       heapMax: 1g # Máximo tamaño que puede alcanzar la memoria de dynamo db
       migrate: true # realizar las migraciones por defecto
       seed: true # Utilice una semilla para poblar la bd
-      convertEmptyValues: true # Convertir los valores vacios a null
+      convertEmptyValues: true # Convertir los valores vacíos a null
     seed: # Semilla a introducir
       domain: # Tipo de semilla
         sources: # Origen de la semilla
@@ -679,7 +679,7 @@ Para iniciar el GUI para dynamo escribimos en nuestra consola:
 
 El entorno gráfico proporcionado por esta herramienta es el siguiente:
 
-![Interfaz grafica de dynamodb admin](./assets/dynamo_admin_gui.png)
+![Interfaz gráfica de dynamodb admin](./assets/dynamo_admin_gui.png)
 
 > El seed no he logrado que funcione. Nada más lo haga, agrego.
 
@@ -693,8 +693,8 @@ El entorno gráfico proporcionado por esta herramienta es el siguiente:
 > Para instalar recuerde que puede usar:
 > `yarn add LIBRERIA`
 > `npm i LIBRERIA`
-> Para iniciar servelress junto a la base de datos usamos el siguiente comando:
-> `serverles offline start`
+> Para iniciar serverless junto a la base de datos usamos el siguiente comando:
+> `serverless offline start`
 
 Comencemos creando un archivo llamado `dynamo.js` que contendrá la conexión a base de datos y sea reutilizable por toda la app. Comencemos por la importación de las librerías:
 
@@ -712,7 +712,7 @@ Pasemos ahora a crear la conexión:
 ```js
 const dataConnection = {
     region: 'localhost', // Aquí pondremos la región de aws que estemos utilizando
-    endpoint: 'http://localhost:8000', // El endpoint de conección a base de datos
+    endpoint: 'http://localhost:8000', // El endpoint de conexión a base de datos
     accessKeyId: 'DEFAULT_ACCESS_KEY',  // la clave de acceso a aws
     secretAccessKey: 'DEFAULT_SECRET' // el secreto para acceder con la llave
 }
@@ -743,7 +743,7 @@ const { DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
 
 const dataConnection = {
     region: 'localhost', // Aquí pondremos la región de aws que estemos utilizando
-    endpoint: 'http://localhost:8000', // El endpoint de conección a base de datos   
+    endpoint: 'http://localhost:8000', // El endpoint de conexión a base de datos   
     accessKeyId: 'AWS_ACCESS_KEY_ID',  // needed if you don't have aws credentials at all in env
     secretAccessKey: 'DEFAULT_SECRET' 
 };
@@ -769,9 +769,9 @@ El siguiente paso es comenzar a utilizar la conexión a la base de datos en los 
 > ```
 > Los archivos que no se ven dentro de este documento pueden encontrarlos en el repositorio:
 > - https://github.com/BadiaValdes/serverless-test-project
-> o puede dirigirse a [códigos complementarios](#codigos-complementarios)
+> o puede dirigirse a [códigos complementarios](#c%C3%B3digos-complementarios)
 >
-> La unica importación que varia en ada uno de los ficheros es:
+> La única importación que varia en ada uno de los ficheros es:
 > `const { LIBRERIA } = require("@aws-sdk/lib-dynamodb");`
 > Ya que la función `Command` (función de acción sobre la base de datos) a utilizar depende de la acción que se va a realizar. 
 
@@ -854,11 +854,11 @@ module.exports.getItems = async (event) => {
 
 > Prueba del endpoint
 - Petición:
-![peticion de busqueda de items](./assets/peticion_buscar_items.png)
+![petición de búsqueda de items](./assets/peticion_buscar_items.png)
 - Respuesta:
-![respuesta de busqueda de items](./assets/respuesta_get_all.png)
+![respuesta de búsqueda de items](./assets/respuesta_get_all.png)
 
-El próximo en ver será la operación de actualizar que trae implicita buscar un elemento:
+El próximo en ver será la operación de actualizar que trae implícita buscar un elemento:
 
 ```js
 module.exports.updateItem = async (event) =>  {
@@ -903,7 +903,7 @@ module.exports.updateItem = async (event) =>  {
 
 > La prueba es similar a la vista en el apartado [Agregar nuevos endpoints](#agreguemos-nuevos-endpoints)
 
-> Se debe mencionar que si pasamos el `id` como parte del objeto del body o se lo añadimos tomandolo de la url, no es necesario realizar el `GetCommand` para obtener un valor. Ver los codigos alternativo [update item 1](#update-item-1) y [update item 2](#update-item-2)
+> Se debe mencionar que si pasamos el `id` como parte del objeto del body o se lo añadimos tomándolo de la url, no es necesario realizar el `GetCommand` para obtener un valor. Ver los códigos alternativo [update item 1](#update-item-1) y [update item 2](#update-item-2)
 
 Para la operación buscar utilizamos `GetCommand`, el cual recibe como primer parámetro la tabla con la que estemos trabajando. En este caso, debemos pasar un segundo parámetro `id` que representa el objeto a buscar. Pero hay que tener en cuenta una cosa. Tenemos que capturar de la url el `id` pero al realizar la operación `JSON.parse` todos los datos se convierten en `string`; por lo que debemos convertir el valor del `id` en `int` mediante el método `parseInt`.
 
@@ -976,7 +976,7 @@ const client = new LambdaClient(consta.lambdaClientConfig);
 module.exports.chain1 = async (event, context, callback) => {
     try{
     const key = event.pathParameters.id;
-    const data = consta.infokeConfig;
+    const data = consta.invokeConfig;
     const input = {
         ...data,
         Payload: JSON.stringify(key)
@@ -1003,13 +1003,13 @@ module.exports.chain1 = async (event, context, callback) => {
 Destripemos el método anterior. Comencemos por las importaciones:
 - `const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');`
   - `LambaClient` -> No permitirá crear nuestro cliente de lambda para realizar las peticiones.
-  - `InvokeCommand` -> Forma parte de los diferentes comandos de la librerí `client-lambda`. Su función es invocar otra función lambda que definamos por parámetros.
+  - `InvokeCommand` -> Forma parte de los diferentes comandos de la librería `client-lambda`. Su función es invocar otra función lambda que definamos por parámetros.
 - `const consta = require('../config/constant');`
   - Esta clase posee todas las configuraciones por defecto que utilizaremos para las pruebas.
 
 A continuación, crearemos la instancia del cliente y mostraremos la configuración utilizada:
 - `const client = new LambdaClient(consta.lambdaClientConfig);`
-  - Configuración (Si no tenemos definida esta configuración nos podria dar un error similar a [error 06](#error-06)):
+  - Configuración (Si no tenemos definida esta configuración nos podría dar un error similar a [error 06](#error-06)):
 ```js  
 static lambdaClientConfig = {
         endpoint: "http://localhost:3002",
@@ -1021,7 +1021,7 @@ static lambdaClientConfig = {
     }
 ```
 
-> Es importante recalcar que, si no agregamos el parámetro de enpoint, de forma automática, se buscará la función en aws.
+> Es importante recalcar que, si no agregamos el parámetro de endpoint, de forma automática, se buscará la función en aws.
 
 Entrando en el código principal de la lambda podemos ver las siguientes líneas:
 
@@ -1036,8 +1036,8 @@ const input = {
 Para la configuración básica la podemos encontrar en el archivo de configuración:
 
 ```js
-static infokeConfig = {
-  FunctionName: "crud-dynamo-dev-chain2", // Nombre de la funcion y estructura que debe seguir service-stage-function
+static invokeConfig = {
+  FunctionName: "crud-dynamo-dev-chain2", // Nombre de la función y estructura que debe seguir service-stage-function
   InvocationType: "RequestResponse" , // Tipos de invocaciones "Event" || "RequestResponse" || "DryRun",
   Payload: "BLOB_VALUE", // Datos que podemos enviar a la siguiente función.
 }
@@ -1097,13 +1097,13 @@ functions:
     events: # Que eventos se pueden realizar
       - httpApi: # Eventos tipos http
           path: /chain1/{id} # Path de acceso al evento
-          method: get # Metodo que acepta el evento http
+          method: get # Método que acepta el evento http
   chain2:
     handler: ./chain/chain2.chain2
     events: # Que eventos se pueden realizar
       - httpApi: # Eventos tipos http
           path: /chain2/ # Path de acceso al evento
-          method: get # Metodo que acepta el evento http
+          method: get # Método que acepta el evento http
 ```
 
 Al terminar todas las configuraciones nuestro archivo `serverless.yml` queda de la siguiente forma:
@@ -1139,17 +1139,17 @@ functions:
     events: # Que eventos se pueden realizar
       - httpApi: # Eventos tipos http
           path: /chain1/{id} # Path de acceso al evento
-          method: get # Metodo que acepta el evento http
+          method: get # Método que acepta el evento http
   chain2:
     handler: ./chain/chain2.chain2
     events: # Que eventos se pueden realizar
       - httpApi: # Eventos tipos http
           path: /chain2/ # Path de acceso al evento
-          method: get # Metodo que acepta el evento http
+          method: get # Método que acepta el evento http
 ```
 
 Teniendo todo programado es hora de pasar a la parte práctica que tanto nos gusta. Vamos a iniciar el server y acceder a `Postman` en este caso. El ejemplo va a seguir la siguiente estructura:
-1. Enviar una petición `GET` al endopint `http://localhost:3000/chain1/{id}`   
+1. Enviar una petición `GET` al endpoint `http://localhost:3000/chain1/{id}`   
     1. Sustituir `{id}` por el número 12
 1. Realizar la petición y ver como se devuelve el valor de la segunda `lambda`.
 
@@ -1160,17 +1160,17 @@ Teniendo todo programado es hora de pasar a la parte práctica que tanto nos gus
 
 ## Middlewares y manejo de errores
 
-No es menos cierto que frameworks js como Express le permiten al programador abstraerse y solo pensar en la lógica del negocio en el programa principal, dejando procesos como validación, añadir tokens u otros similares a un mecanismo más general. Este mecanismo se llama middlewares y su función es mediar entre las peticiones recibidas o de salida con las funciones creadas. Para AWS poseemos una librería que nos permite la implementación de midddlewares, logrando una mejor separación del código y legibilidad.
+No es menos cierto que frameworks js como Express le permiten al programador abstraerse y solo pensar en la lógica del negocio en el programa principal, dejando procesos como validación, añadir tokens u otros similares a un mecanismo más general. Este mecanismo se llama middlewares y su función es mediar entre las peticiones recibidas o de salida con las funciones creadas. Para AWS poseemos una librería que nos permite la implementación de middlewares, logrando una mejor separación del código y legibilidad.
 
 > La librería se llama **middy**
-> Para isntalarla usamos:
+> Para instalarla usamos:
 > `npm install --save @middy/core`
 > Para agregar el manejo de errores añadimos:
 > `npm install --save @middy/http-error-handler`
 > Para más información de la librería pueden ir al sitio:
 > https://middy.js.org/docs/intro/getting-started
 >
-> Para poder levantar errores de tipo HTTP (no vienen predefinido en js), podemos usar la siguietne librería: https://www.npmjs.com/package/http-errors. 
+> Para poder levantar errores de tipo HTTP (no vienen predefinido en js), podemos usar la siguiente librería: https://www.npmjs.com/package/http-errors. 
 > Tenga en cuenta que mientras más librerías le adiciones al proyecto, este pesará mucho más y amazon cobra también por espacio de almacenamiento.
 
 Veamos un ejemplo sencillo de su uso:
@@ -1195,7 +1195,7 @@ const throwError = (event) => {
 module.exports.middyWrapper = middy(throwError).use(httpErrorHandler());
 ```
 
-En este código usamos `middy` para encapsular nuestra función dentro de la cadena de middlewares y posteriormente (mediante `use`) le añadimos el middleware de `httpErrorHandler`. Esto último nos permite abstraernos de la lógica de devolución de errores y permitir que dicho middleware se encarge de todo el procedimiento de formateo y devolución de la información. 
+En este código usamos `middy` para encapsular nuestra función dentro de la cadena de middlewares y posteriormente (mediante `use`) le añadimos el middleware de `httpErrorHandler`. Esto último nos permite abstraernos de la lógica de devolución de errores y permitir que dicho middleware se encargue de todo el procedimiento de formateo y devolución de la información. 
 
 Pasemos a la fase de prueba:
 
@@ -1273,7 +1273,7 @@ const throwError = (event) => {
 }
 
 module.exports.middyWrapper = middy(throwError).use(httpErrorHandler())
-.use(middlewares.errorLogMiddleware()) // Aqui añadimos el middleware para el mano de errores
+.use(middlewares.errorLogMiddleware()) // Aquí añadimos el middleware para el mano de errores
 .use(middlewares.inputValidationMiddleware()); // Este se encarga de validar que el dato esté correcto
 ```
 Probemos a ver si de verdad se cumplen los dos middlewares:
@@ -1370,7 +1370,7 @@ const { ILogger, logFactory } = require('aws-bunyan'); // Importación de la lib
 const logs = require('./log') // Importación de la clase para manejar los logs
 
 // Declaración de las variables para los logs
-const logTypes = require('./constant').bunyanLogType // Esta variable posee los enum para los tipos de logs permititods
+const logTypes = require('./constant').bunyanLogType // Esta variable posee los enum para los tipos de logs permitidos
 
 const logInstance = logFactory.createLogger('MiddlewareLogs') // Instancia de la clase logFactory de bunyan. Le pasamos por parámetros un nombre para identificar que clase o archivo lanzó el log.
 
@@ -1436,7 +1436,7 @@ Una vez instalada podemos dar comienzo a la creación de las stepFunctions y que
 La idea es almacenar en la carpeta `stepFunctions` todos los ejemplos que vamos a utilizar. Dentro de la misma, para mayor comodidad, vamos a dividir las funcionalidades en dos archivos:
 
 - `steps.js` -> En este archivo vamos a guardar las funciones que forman parte de los *steps functions*.
-- `stepFunctions.js` -> Aqui pondremos todas los `stepsFunctions` que creemos para el proyecto.
+- `stepFunctions.js` -> Aquí pondremos todas los `stepsFunctions` que creemos para el proyecto.
 
 Veamos los códigos dentro de `steps.js`:
 
@@ -1499,7 +1499,7 @@ await stepFunc.getClient().send(stepFunc.getCommand())
 ```
 
 Esta parte del código tiene de los dos lados:
-- `stepFunc.getClient()` -> pertrenece a la clase de configuración y lo veremos más adelante. Su función es obtener el cliente de conexión.
+- `stepFunc.getClient()` -> pertenece a la clase de configuración y lo veremos más adelante. Su función es obtener el cliente de conexión.
 - `stepFunc.getCommand()` -> similar al anterior, pero su función es obtener el archivo de configuración de la llamada.
 - `.send(...)` -> Esta función ya es propia de la librería que estamos usando `@aws-sdk/client-sfn`. Su función es ejecutar la máquina de estado (`stepFunction`) declarada en el archivo `serverless.yml` (se ejecuta la que coincida con el nombre pasado por parámetros).
 
@@ -1596,7 +1596,7 @@ StepFunctions.prototype.setFunc = function setFunc(fun) {
 };
 ```
 
-Para añadirle métodos a nuestra "clase", debemos utilizar la propiedad prototype de nuestra función principal. Esta nos permite añadir "comportamientos" extras a una función. En este caso estamos declarando la función `setFunc` dentro de nuestra "clase" y asignandole otra función, si se desea, también se puede crear una `arrow function`.
+Para añadirle métodos a nuestra "clase", debemos utilizar la propiedad prototype de nuestra función principal. Esta nos permite añadir "comportamientos" extras a una función. En este caso estamos declarando la función `setFunc` dentro de nuestra "clase" y asignándole otra función, si se desea, también se puede crear una `arrow function`.
 
 ```js
 StepFunctions.prototype.getCommand = function getCommand(){
@@ -1615,7 +1615,7 @@ StepFunctions.prototype.getCommand = function getCommand(){
 
 Por último, les quiero mostrar la función encargada de crear el comando para la ejecución de los `stepFunctions`. Como pueden ver declaramos una variable con los parámetros a utilizar; en este caso solo definimos `stateMachineArn` que hace referencia el `arn` de la stepFunction declarada en `serverless.yml`. La variable `_func` se encarga de almacenar dicho valor que debe ser añadido mediante `setFunc`. Posteriormente, se crea la instancia de `StartExecutionCommand`, encargado de crear los puntos de acceso interno a nuestra máquina de estados.
 
-¿Vuelvo a repetir, bien feo no? Esto se debe a que serverless utiliza por defecto `ES5` que es el estandar de codificación de js. Actualmente js se rige por el estandar `ES6`, pero para poder utilizarlo dentro de nuestros scripts de `serverless`, debemos instalar la siguiente dependencia:
+¿Vuelvo a repetir, bien feo no? Esto se debe a que serverless utiliza por defecto `ES5` que es el estándar de codificación de js. Actualmente js se rige por el estándar `ES6`, pero para poder utilizarlo dentro de nuestros scripts de `serverless`, debemos instalar la siguiente dependencia:
 
 ```bash
 npm install --save-dev serverless-bundle
@@ -1647,20 +1647,20 @@ plugins:
   - serverless-step-functions-local 
   - serverless-step-functions 
   - serverless-offline-lambda
-  - serverless-offline # Este siempre tiene que ser el útlimo
+  - serverless-offline # Este siempre tiene que ser el último
 
 custom:
   # Se ponen seguidos ya que los dos poseen la misma configuración
   serverless-offline: # Configuración de las dependencias de serverless offline
   stepFunctionsLocal: # Configuración de las step functions
-    accountId: 101010101010 # Dummy acount id
+    accountId: 101010101010 # Dummy account id
     region: us-east-1 # Dummy region
     TaskResourceMapping: # Mapeo de las funciones a utilizar en los steps. Esto es solo para serverless offline
       FirstState: arn:aws:lambda:us-east-1:101010101010:function:initial # arn de la función. El nombre completo que recibe en aws
       FinalState: arn:aws:lambda:us-east-1:101010101010:function:final
 
 functions:
-# Declaramos todas las funciones del step functions aqui.
+# Declaramos todas las funciones del step functions aquí.
   initial:
     handler: ./stepFunctions/steps.initial
     events:
@@ -1729,11 +1729,11 @@ En el mismo código se explica que significa cada elemento, por lo que no es nec
   - La lista de nuestros estados mediante `States`
   - Por cada estado:
     - Un nombre, por ejemplo `FirstState`
-    - Un tipo mediante `Type`. Para más información de los tipos disponible, vea https://docs.aws.amazon.com/step-functions/latest/dg/concepts-states.html o para un resumen, dirigase a [tipos de step functions](#step-functions-type)
+    - Un tipo mediante `Type`. Para más información de los tipos disponible, vea https://docs.aws.amazon.com/step-functions/latest/dg/concepts-states.html o para un resumen, diríjase a [tipos de step functions](#step-functions-type)
     - La propiedad siguiente depende del `type` seleccionado.
     - Próximo estado en la cadena mediante `next`
 
-De esta forma ya tenemos declarado nuestra máquina de estado. Para ver ejemplos de otros tipos de máquina de estado (otros types aparte de los vistos anteriormente), puede dirigirse al link anterior o al siguiente repositoirio de github: https://github.com/richlloydmiles/serverless-step-functions-local-example.
+De esta forma ya tenemos declarado nuestra máquina de estado. Para ver ejemplos de otros tipos de máquina de estado (otros types aparte de los vistos anteriormente), puede dirigirse al link anterior o al siguiente repositorio de github: https://github.com/richlloydmiles/serverless-step-functions-local-example.
 
 Ahora veamos las dos líneas de código a añadir en `package.json`:
 
@@ -1755,19 +1755,21 @@ La primera nos permite eliminar (de forma manual) una máquina de estado ya crea
 # Comandos
 - `serverless offline` -> Iniciar proyecto 
 - `serverless offline start` -> Iniciar proyecto y base de datos
-- `serverless` o `sls` -> Crear un proyecto (en powershel sls no funciona ya que hace referencia a otro comando)
+- `serverless` o `sls` -> Crear un proyecto (en powershell sls no funciona ya que hace referencia a otro comando)
 - `dynamodb-admin` -> iniciar GUI admin de dynamo
 - `serverless dynamodb start` -> inicia base de datos dynamo local
 - `aws config` -> configurar las credenciales de aws
-- `npm uninstall dependencia` -> Desintalar una dependencia npm installada
+- `npm uninstall dependencia` -> Desinstalar una dependencia npm instalada
 - `npm install dependencia` -> Instalar dependencia
-- `sls dynamodb remove` -> Remover dynamodb (La base de datos descargada) del poryecto
+- `sls dynamodb remove` -> Remover dynamodb (La base de datos descargada) del proyecto
+- `serverless deploy` -> Nos permite desplegar nuestra app dentro de aws.
+- `serverless deploy --aws-profile serverless-sns` -> el flag `--aws-profile` nos permite definir el perfil a utilizar para el despliegue.
 
-# Proyectos de interes
+# Proyectos de interés
 - https://github.com/halarcont/serverless-aws-crud-dynamodb/blob/main/src/addTask.js
 - https://github.com/BadiaValdes/serverless-test-project (Proyecto por el que se está documentando)
 
-# Bibliografia
+# Bibliografía
 
 ### Página Oficial
 - https://www.serverless.com/
@@ -1778,7 +1780,7 @@ La primera nos permite eliminar (de forma manual) una máquina de estado ya crea
 ### Deploy
 - https://www.tutorialspoint.com/serverless/serverless_deploying_function.htm
 
-### Typescirpt
+### Typescript
 - https://blog.logrocket.com/building-serverless-app-typescript/
 
 ### Step Functions
@@ -1846,10 +1848,10 @@ La primera nos permite eliminar (de forma manual) una máquina de estado ya crea
 >
 > **Solucion**
 > 
-> - Desintalar: `serverless-dynamodb-local`
+> - Desinstalar: `serverless-dynamodb-local`
 > - Instalar: `serverless-dynamodb `
 > - Las instalaciones para development
-> - Para desintalar la dependencia usamos `npm uninstall serverless-dynamodb-local`
+> - Para desinstalar la dependencia usamos `npm uninstall serverless-dynamodb-local`
 >
 > En el yml cambiamos:
 > ```
@@ -1875,7 +1877,7 @@ La primera nos permite eliminar (de forma manual) una máquina de estado ya crea
 >
 > El error proporcionado tiene que ver con problemas de credenciales.
 >
-> **Solucion**
+> **Solución**
 >
 > Debemos configurar nuestras credenciales de aws dentro del pc (aunque sean de mentira).
 > Para ello escribimos el siguiente comando en una consola y rellenamos la información que se nos pida (pueden ser datos falsos menos la region. En ese caso usa uno de los permitidos - eu-east-1 - por ejemplo):
@@ -1890,9 +1892,9 @@ La primera nos permite eliminar (de forma manual) una máquina de estado ya crea
 >
 > Error: `ValidationException: The number of attributes in key schema must match the number of attributes defined in attribute definitions.`
 > 
-> **Solucion**
+> **Solución**
 >
-> Este error viene dado por una malformación de los datos de la tabla. Especificamente en:
+> Este error viene dado por una malformación de los datos de la tabla. Específicamente en:
 >
 > ```yml
 >         AttributeDefinitions: # Definición de los atributos de la tabla
@@ -1924,7 +1926,7 @@ La primera nos permite eliminar (de forma manual) una máquina de estado ya crea
 >
 > ![security_token_error](./assets/security_token_error.png)
 > 
-> **Solucion**
+> **Solución**
 > En este caso se estaba utilizando la librería `aws-sdk` directamente y no `@aws-sdk` como hemos utilizado durante el proyecto.
 >
 > El problema radicaba en que el `sdk` estaba intentando conectarse a amazon para poder ejecutar los comandos internos. Al decirle que su objetivo (`endpoint`) es un servidor local no intentará más conectarse a aws.
@@ -1944,7 +1946,7 @@ La primera nos permite eliminar (de forma manual) una máquina de estado ya crea
 >
 > ![lambda call error](./assets/lambda_call_security_token.jpg)
 > 
-> **Solucion**
+> **Solución**
 > Este error se debe a que el cliente para el llamado de las lambdas está intentando conectarse directamente a aws y no al servidor local. La solución es pasarle a la instancia de `LambdaClient` la siguiente configuración:
 >
 >``` js
@@ -1966,14 +1968,14 @@ La primera nos permite eliminar (de forma manual) una máquina de estado ya crea
 >
 > **Esto no es recomendado**
 > 
-> **Solucion**
+> **Solución**
 > Este error se debe a que las funciones lambdas por defecto poseen un timeout pequeño. Este problema se resuelve modificando en el archivo `serverless.yml` la declaración del lambda.
 >
 >``` yml
 > provider:
 >    #...
->    memorySize: 512 # Esto nos permite declarar el tamaño de memoria global que tendran los lambda
->    timeout: 50 # Nos permite delcarar el tiempo de espera global de los lambda
+>    memorySize: 512 # Esto nos permite declarar el tamaño de memoria global que tendrán los lambda
+>    timeout: 50 # Nos permite declarar el tiempo de espera global de los lambda
 >   
 > functions:
 >    custom_timeout: #will override the default timeout
@@ -1988,11 +1990,11 @@ La primera nos permite eliminar (de forma manual) una máquina de estado ya crea
 > `StateMachineAlreadyExists: State Machine Already Exists: 'arn:aws:states:us-east-1:101010101010:stateMachine:WaitMachine'`
 >
 > 
-> **Solucion**
+> **Solución**
 > Ejecutar:
 > - npm run delete
 > - yarn delete
-> En ambos casos, el servidor debe estar ejecutandose
+> En ambos casos, el servidor debe estar ejecutándose
 # Estructura de la variable event (Llamada http):
 ```js
 {
@@ -2038,7 +2040,7 @@ La primera nos permite eliminar (de forma manual) una máquina de estado ya crea
   version: '2.0'
 } 
 ```
-# Codigo alternativo
+# Código alternativo
 
 ### Update Item 1
 > Para la primera variante veremos como utilizar el id que viene de la url y añadirlo al objeto
@@ -2119,7 +2121,7 @@ module.exports.updateItem = async (event) =>  {
   }
 ```
 
-# Codigos complementarios
+# Códigos complementarios
 
 ## Message.js
 ```js
