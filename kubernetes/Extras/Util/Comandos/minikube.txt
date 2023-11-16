@@ -1,0 +1,35 @@
+********** MINIKUBE ************
+
+****** INICIAR MINIKUBE
+> minikube start
+
+// Usar un driver
+> minikube start --driver=docker
+
+// Old kubernetes-version
+> minikube start --kubernetes-version=v1.11.10
+
+
+******* Cambiar estados de MINIKUBE 
+// Pausar
+> minikube pause
+
+// Play
+> minikube unpause
+
+// Stop
+> minikube stop
+
+******** Cambiar algunas configuraciones
+// limite de ram
+> minikube config set memory 1024
+
+********* Create second cluster
+> minikube start -p aged --kubernetes-version=v1.16.1
+
+
+********** Eliminar ************
+> minikube delete --all
+
+
+

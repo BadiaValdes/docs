@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-test
+  labels:
+    app: springTest
+    author: jebadia
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: springTest
+  Template:
+    metedata:
+      labels:
+        app: springTest
+    spec:
+      containers:
+        - name: springApp
+          image: springApp:0.1.0
+          ports:
+            - containerPort: 9887
+          env:
+            - name: EVAL
+              valueFrom:
+                configMapKeyRef:
+                  name: springMap
+                  key: testVal

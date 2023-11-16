@@ -1,0 +1,12 @@
+apiVersion: v1 # Version to use
+kind: Service # Type of component
+metadata: # General data
+  name: knote-lb # Component name
+spec: # Specs
+  selector: # Which component will be selected
+    app: knote # Key value inside match Label of that component
+  ports:
+    - port: 3033 # External port
+      targetPort: 8080 # Component exposed port
+      name: http
+  type: LoadBalancer # Type of service

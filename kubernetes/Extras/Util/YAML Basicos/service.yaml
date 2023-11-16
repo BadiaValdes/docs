@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-test
+spec:
+  selector:
+    app: nignx
+  type: NodePort
+  ports:
+  - port: 9091
+    targetPort: 8080
+    protocol: TCP
+    nodePort: 31987
+
+    

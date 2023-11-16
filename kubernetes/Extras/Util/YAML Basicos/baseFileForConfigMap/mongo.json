@@ -1,0 +1,4 @@
+{
+    "dbHost" : "mongo-service",
+    "dbCollection": "blue"
+}

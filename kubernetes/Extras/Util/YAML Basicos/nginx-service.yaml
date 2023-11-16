@@ -1,0 +1,12 @@
+# Basic configuration for service
+apiVersion: v1
+kind: Service # Type of kubernete component that will be created
+metadata: # Service general information
+    name: nginx-service # Service name
+spec: # Service specifications
+    selector: # Here we are going to write all the component's "matchLabels" that will use this service 
+        app: nginx # sames as the one in matchLabels on deployment file
+    ports: # This allow us to map the entry port for the pod and the target port for accessing the container
+        - protocol: TCP # Define the protocol for data transfer (TCP, UDP)
+          port: 80 # Entry pod port
+          targetPort: 8080 # Container Port

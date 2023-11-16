@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap # Tipo de archivo ConfigMap
+metadata: # Datos generales del configmap
+  name: mongo-config # nombre que se le va a dar dentro del ecosistema
+data: # Datos que va a almacenar
+  # Directamente datos de clave valor
+  db_host: mongo-service
+
+  # Mediante el uso de un archivo
+  mongo.conf: | # Esto permite definir el contenido del archivo
+    collectionName=blue
+    collectionSecond=name
+

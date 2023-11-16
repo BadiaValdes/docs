@@ -1,0 +1,7 @@
+**
+> error: unable to listen on any of the requested ports: [{7080 8080}]
+>> Esto lo resolví cambiando el puerto de mapeo de la PC, en vez de poner 7080, utilice el 2345
+
+**
+> error: pulling image from kube-dashboard
+>> Cambiar la version de kubernetes en minikube

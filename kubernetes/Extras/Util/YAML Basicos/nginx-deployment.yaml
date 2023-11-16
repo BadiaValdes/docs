@@ -1,0 +1,23 @@
+# basic an minimum yaml configuration for deployment
+apiVersion: apps/v1 # API Version for YAML File
+kind: Deployment # Type of kubernete component that will be created
+metadata: # Deployment general information
+    name: nginx-deployment # Deployment name
+    labels: # Pair of key - value that let us define queriable information about deployment
+        app: nginx
+spec: # Pods specification
+    replicas: 2 # Number of replicas that will be created
+    selector: # Define the way that other components can locate this Pods
+        matchLabels: # Define the labels that would allow other component to pair with this deployment
+            app: nginx # All the labels we write here, must be the same as the one we put in the template
+    template: # PODS information
+        metadata: # General information about Pod
+            labels:
+                app: nignx
+                test: test-one # No all the labels written down here have to be in the matchLabels section
+        spec: # Holds the pod specifications
+            containers: # Information about container
+                - name: nginx # The container name
+                    image: nginx:1.16 # Base container image
+                    ports: # The ports maped from the container
+                    - containerPort: 8080 # Define here the ports

@@ -1,0 +1,23 @@
+apiVersion: apps/v1 # Change according the kind please see https://matthewpalmer.net/kubernetes-app-developer/articles/kubernetes-apiversion-definition-guide.html
+kind: Deployment # Set deployment component type
+metadata:
+  name: knote # component name
+spec: # Component specifications
+  replicas: 1 # Quantity of replicas for this deployment. This creates a replica set
+  selector: # How other components can select this one
+    matchLabels: # allowed labels to select this component
+      app: knote # Key - value. If you want to apply a specific configuration to this component, you will use this matchlabel key - value
+  template: # Application values
+    metadata:
+      labels:
+        app: knote # Sames as the selector. The selector uses this label to match other components with this one. You can have as many labels as you want. But you can have many matchlabels as labels like you have Method to get a specific total value from a column
+    spec: # application properties
+      containers: # like docker container
+      - name: app # Container name
+        image: knote-java # Docker image to be used
+        ports:
+          - containerPort: 8080 # Port exposed by the container
+        env: # Environment variables
+          - name: MONGO_URL
+            value: mongodb://mongo:27017/dev
+        imagePullPolicy: IfNotPresent # Download the image if is not present in your local docker

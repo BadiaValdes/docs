@@ -1,0 +1,115 @@
+********** KUBE CTL ************
+https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+https://www.containiq.com/post/kubectl-config-set-context-tutorial-and-best-practices
+https://jamesdefabia.github.io/docs/user-guide/kubectl/kubectl_expose/
+https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/
+
+********* Get Name Space
+> kubectl get ns
+
+********* Get Name Space Summary
+> kubectl get ns NAME
+
+********* Get Name Space With Detailed Info
+> kubectl describe ns NAME
+
+********* Delete name space
+> kubectl delete ns NAME
+
+********* Create Deployment
+> kubectl create deployment KUBE_NAME --image=IMAGE_NAME
+
+// Otras opciones
+
+********* Cargar archivo tml
+> kubectl apply -f ./archivo.yml
+
+
+********* Expose deployment
+> kubectl expose deployment hello-minikube --type=NodePort --port=8080
+
+// Algunas opciones
+--port=PORT_NUMBER -> aquí decimos que puerto vamos a utilizar para acceder a nuestro despliegue
+--target-prt=PORT_NUMBER -> ponemos el puerto que utiliza nuestro contenedor
+** La union de estos dos nos permiten mapear un puerto de entrada con el puerto de salida del contenedor.
+-f NOMBRE_DEL_ARCHIVO -> utilizaremos un archivo yml con los datos como el nombre por ejemplo
+--type -> tipo de servicio que debe utilizar 
+	> ClusterIP (default)
+	> LoadBalancer
+	> ClusterIP
+
+************ GET CURRENT CONTEXT
+> kubectl config current-context
+
+************ Obtener todos los contextos
+> kubectl config get-contexts
+
+************ Ver configuración 
+> kubectl config view
+
+************ Cambiar contexto
+> kubectl config use-context CONTEXT_NAME
+
+************ Obtener la información Resumida de los POD en el cluster
+> kubectl get po -A
+
+************ Obtener la información ampliada de los POD
+> kubectl get pods -o wide
+
+************ Describir el estado de un POD - Parecido a los LOGS
+> kubectl describe pod POD_NAME
+>> --namespace=NAMESPACE_NAME -> para ver la descripción de un pod no default 
+
+************ Obtener los logs
+> kubectl logs POD_NAME
+
+************ Eliminar un POD
+> kubectl delete pod NOMBRE_DEL_POD
+
+// Si el pod da problema para eliminar podemos utilizar estos flags
+// --grace-period=0 --force
+
+************ Eliminar todos los pods de un namespace
+> kubectl delete --all TYPE(POD, SERVICE...) --namespace=NAMESPACE_NAME
+> kubectl delete --all namespaces
+
+************ Detener un pod evitando errores
+> kubectl drain POD_NAME
+>> --ignore-daemonsets -> ignorar el error de DeamonSet de los pod
+>> --delete-emptydir-data -> utilizar si da error por uso de almacenamiento
+
+************ Exponer la API de kubernetes
+> kubectl proxy --port=YOUR_PORT_HERE
+
+************ Escalar el numero de pods
+> kubectl scale deployment DEPOYMENT_NAME --replicas=REPLICAS_NUMBER
+
+************ Obtener eventos
+> kubectl get events --sort-by=.metadata.Timestamp
+
+************ Crear service account
+> kubectl create serviceaccount SERVICEACCOUNT_NAME
+
+************ Crear token para el service account
+> kubectl create token SERVICEACCOUNT_NAME
+
+************ Crear secreto 
+> kubectl create secret generic secret-name --from-file=PATH_TO_FILE 
+// Se puede repetir el flag --from-file
+// En caso que queramos crear un secreto de un literal --from-literal
+
+************ Crear config Map
+> kubectl create configmap CONFIGMAP_NAME --from-file ./PATH_TO_FILE
+// Se puede repetir el flag --from-file
+// En caso que se quiera crear de un archivo .env, usar --from-env-file
+// Desde un literal --from-literal key=value
+
+************ Ver contenido de configmap
+> kubectl get configmap NAME -o yml
+
+************ Acceder a un POD
+> kubectl exec -it POD_NAME -- /bin/sh
+
+
+
+

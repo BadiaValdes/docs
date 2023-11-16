@@ -1,0 +1,40 @@
+** LINKS
+https://helm.sh/docs/helm/helm_install/
+https://www.digitalocean.com/community/tutorials/how-to-install-software-on-kubernetes-clusters-with-the-helm-3-package-manager
+https://www.devspace.sh/component-chart/docs/configuration/annotations
+https://devopscube.com/create-helm-chart/
+
+** Adicionar repositorios
+> helm repo add REPOSITORY_DIR
+
+** Listar repositorios
+> helm repo list
+
+** Ver las aplicaciones instaladas con helm
+> helm list
+
+** Actualizar repositorios
+> helm repo update
+
+** Instalar Chart
+> helm install NAME_RELEASE REPO_NAME/CHART_NAME
+> --set variable=value, variable2 = value -> Para modificar parámetros internos del chart
+> --dry-run --debug CHART_DIRECTORY -> para utilizar un chart de HELM creado localmente, no se debe poner REPO_NAME/CHART_NAME
+> * REPO_NAME/CHART_NAME puede ser la dirección a un archivo .tgz en la computadora
+
+** Eliminar Chart
+> helm uninstall NAME_RELEASE
+
+** Crear chart
+> helm create CHART_NAME -> creará una estructura para la creación de un chart.
+
+** Actualizar revision
+> helm upgrade NAME_RELEASE REPO_NAME/CHART_NAME 
+> --set controller.replicaCount=3 -> modificar un valor
+> --reuse-values -> utilizar los mismos valores que ya posee a parte del modificado
+
+** Rollback Revision
+> helm rollback NAME_RELEASE VERSION
+
+** Empaquetar nuestro archivo HELM
+> helm package CHART_DIRECTORY

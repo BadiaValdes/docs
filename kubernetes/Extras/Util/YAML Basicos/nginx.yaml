@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+#PODS
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template: # PODS Specifications
+    metadata: 
+      labels:
+        app: nginx
+        author: jebadia
+    spec:
+      containers:
+      - name: nginx 
+        image: nginx:1.16 
+        ports:
+        - containerPort: 8080 
+        env:
+        - name: API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: url-data
+              key: url
+        - name: NGINX_ENVSUBST_OUTPUT_DIR
+          valueFrom:
+            secretKeyRef:
+              name: dir-data
+              key: dir
+        volumeMounts:
+        - name: nginx-second-data
+          mountPath: var/http/data  
+      volumes:
+        - name: nginx-second-data
+          configMap:
+            name: url-data
+        - name: nginx-secret
+          secret:
+            name: dir-data
+
+          
+        
