@@ -319,7 +319,7 @@ finally:
 ### Lanzar excepción
 
 ```py
-raise ERROR_NAME('data')
+    raise ERROR_NAME('data')
 ```
 
 ### Clases
