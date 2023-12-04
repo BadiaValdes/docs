@@ -4,3 +4,5 @@ En este apartado veremos como crear una aplicación sencilla con todo lo visto e
 
 ![Django Draw](./assets/DjangoSimpleMVC.drawio.png)
 
+
+
