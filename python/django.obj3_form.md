@@ -2,7 +2,7 @@
 
 En este tutorial estaremos abordando los temas relacionados con:
 
-- Formularios.
+- **Formularios**.
 - Vistas genéricas en Django.
 - Llamadas a servicios externos
 - Pruebas. DDT.
