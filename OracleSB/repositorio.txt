@@ -1,0 +1,3 @@
+git clone https://gitlab.com/projects-cocoon/oracleservicebusexampleproject.git
+
+http> https://gitlab.com/projects-cocoon/oracleservicebusexampleproject

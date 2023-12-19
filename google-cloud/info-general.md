@@ -143,7 +143,20 @@ Y de esta forma creamos un repositorio vacío en `Google Cloud`.
 # Despliegue continuo
 
 > Aquí asumimos que posees tu repositorio dentro de google cloud o github.
+> Además, debes tener habilitadas las funcionalidades de `Cloud Source Repositories Apis` y `Cloud Build`
 
+1. Vamos al apartado de crear servicio
+2. Cunado se crea el servicio, debe seleccionar `Continuously deploy new revisions from a source repository` (Despliegue continuo desde un repositorio) en el apartado de configuración.
+3. En la creación del servicio marcamos la casilla de `Set up with Cloud Build` o `Configurar con Cloud Build`
+4. Selecciona el proveedor (**GitHub**, **Bitbucket** y **Cloud Repository**). En los dos primeros casos, debemos autenticarnos o en el caso específico de **GitHub**, podemos crear un espejo del código dentro de **Cloud Repository**.
+![Continuous Delivery, Select repository](./assets/continuous_delivery_1.png)
+5. En el próximo paso del formulario, nos toca seleccionar la rama (`branch`) que se estará observando para hacer el despliegue.
+6. Ahora viene la parte importante. Cómo queremos desplegar nuestra aplicación. Si vamos a utilizar docker para nuestro despliegue, debemos seleccionar la opción `Dockerfile` y darle la dirección a dicho archivo.
+    - En caso de querer compilar el código directamente debemos seleccionar la segunda opción. Tenga en cuenta que solo se podrán compilar los lenguajes soportados por `Google Cloud Buildpacks`.
+![Continuous Delivery, Select source branch](image.png)
+7. Al presionar `save` el sistema nos permitirá una revisión de los datos introducidos al principio de la creación del servicio. Si estamos de acuerdo con la configuración presionamos `create`.
+
+Después de terminada la creación del servicio, seremos redirigidos a la página de detalles del servicio. Dentro podremos seguir el ciclo de vida de los despliegues realizados por la aplicación y en caso de que exista un error, podremos ver un log detallado.
 
 
 # Quitando la app de `gCloud`

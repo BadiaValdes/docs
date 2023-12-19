@@ -1,0 +1,57 @@
+Tareas macro:
+
+Realizar y documentar:
+
+Basico
+1. instalación configuración de la herramienta jdeveloper.
+2. creación de servicio de datos(usando SP y directo contra tablas de la BD Oracle), despliegue y pruebas en el server. que incluya lo de los jndi en el weblogic.
+
+Medio
+3. creación de servicio proxy con transformaciones en XSLT y XQuery. Uso de DVM. Exponer tanto por REST como por SOAP y hacer transformaciones entre uno y otro.
+
+Engorroso
+4. Trabajo con los BPEL.
+
+
+5. Uso de planes de despliegue.
+6. Instalar weblogic externo
+
+/////////////////////////////////////
+
+---- Crear usuario en docker oracle
+docker exec -it 641f4bd45543 sqlplus system/oracle@//localhost/ORCLPDB1
+
+ CREATE USER username
+    IDENTIFIED BY password
+    [DEFAULT TABLESPACE tablespace]
+    [QUOTA {size | UNLIMITED} ON tablespace]
+    [PROFILE profile]
+    [PASSWORD EXPIRE]
+    [ACCOUNT {LOCK | UNLOCK}];
+	
+ alter user MDSYS default tablespace SPATIAL_TBS; -> Alter user tablespace
+
+
+grant connect, resource to develop;
+quota unlimited on users;
+alter session set current_schema = DEVELOP;
+
+On the ITtoolbox Forum, a confrontation concerning ORA-01950 has been posted.   A replier offers information, by asking the user to solve ORA-01950 by either:
+
+    ALTER USER <username> QUOTA 100M ON <tablespace name>
+     
+    GRANT UNLIMITED TABLESPACE TO <username>
+
+
+---- Crear JNDI en weblogic
+1  Services -> DataSource -> New -> Generic Data Source
+2  en name poner el UIConnectionName del jca "Por convencion no es obligado"
+3  en JNDI Name poner jdbc/<nombre de arriba en minuscula> "Por convencion no es obligado"
+4  next hasta configurar la BD y despues next probar y finish
+5  Environment -> Deployments -> DbAdapter -> Configuration -> Outbound Connection Pools -> New
+6  seleccionar el radio javax.resource.cci.ConnectionFactory 
+7  ir al archivo .jca del adapter copiar el location y ponerlo como nombre del jndi
+8  Environment -> Deployments -> DbAdapter -> Configuration
+9  desplegar el signo de + de javax.resource.cci.ConnectionFactory buscar el jndi que acabamos de crear y darle click
+10 en XADataSourceName en el value poner el JNDI Name que se puso en el DataSource "paso 3"
+11 Environment -> Deployments -> DbAdapter check en el listado el DbAdapter y darle update
