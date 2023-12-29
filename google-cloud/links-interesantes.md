@@ -6,3 +6,27 @@
     - Este video de `YouTube` explica como ejecutar contenedores dentro de Cloud Run. En este caso se utiliza se explican dos formas de utilizar imágenes de docker. La primera consiste en utilizar en google cloud una imagen de `docker hub`. La segunda es a partir de un repositorio, generar la imagen.
 - https://www.youtube.com/watch?v=ugBRnPDJIOw (Español) -> Hace 1 año
     - Este video de `YouTube` explica como realizar un despliegue continuo de una aplicación de react.
+- https://github.com/GoogleCloudPlatform/nodejs-docs-samples.git
+    - Ejemplos de código en `GitHub` de trabajo en la nube.
+- https://github.com/GoogleCloudPlatform/cloud-sql-nodejs-connector
+    - Ejemplos de código en `GitHub` de conexión con base de datos de gCloud.
+- https://www.youtube.com/watch?v=Y3I5hE4wKWI
+    - Este video de `YouTube` explica como conectar una aplicación de node js con Cloud SQL. Específicamente con MySQL.
+- https://medium.com/@kodin/deep-dive-into-google-cloud-sql-connector-for-node-js-3e2c75aa5038
+    - Página de `medium` donde explican como conectarse a `Cloud SQL`
+- https://billmartin.io/blog/how-to-build-and-deploy-a-nodejs-api-on-google-cloud
+    - Página donde explican el despliegue de una aplicación en express con mysql y GCP.
+- https://tutorialsdojo.com/google-cloud-identity-and-access-management-iam/
+    - Explicación del componente `IAm` de `GCP`
+- https://ermetic.com/blog/gcp/introduction-to-iam-in-google-cloud-platform-gcp/
+    - Explicación del componente `IAm` de `GCP`
+- https://cloud.google.com/run/docs/securing/managing-access
+    - Brindar acceso a `Cloud Run` mediante `IAm`
+- https://www.cloudskillsboost.google/paths/19/course_templates/530
+    - Desarrollo de una aplicación contenerizada en google cloud
+- https://cloud.google.com/blog/topics/developers-practitioners/devops-and-cicd-google-cloud-explained
+    - Google Cloud CI-CD explicado
+- https://kevinsimper.medium.com/building-docker-images-with-docker-compose-on-google-cloud-container-builder-292b1eb3fd31
+    - Usar docker compose en google cloud
+- https://dev.to/af/gcp-cicd-pipeline-build-docker-images-after-commits-to-a-repo-branch-google-cloud-source-repositories-500o
+    - GCP CI/CD Pipeline con Cloud Build y repo de github
