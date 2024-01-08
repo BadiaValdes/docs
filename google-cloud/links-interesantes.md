@@ -30,3 +30,11 @@
     - Usar docker compose en google cloud
 - https://dev.to/af/gcp-cicd-pipeline-build-docker-images-after-commits-to-a-repo-branch-google-cloud-source-repositories-500o
     - GCP CI/CD Pipeline con Cloud Build y repo de github
+- https://cloud.google.com/run/docs/tutorials/secure-services
+    - Conectar dos servicios, uno frontend y otro backend
+- https://developers.google.com/learn/pathways/solution-three-tier-cloud-run
+    - Artículos sobre creación de aplicaciones con google cloud
+- https://www.youtube.com/watch?v=-US__I2-u3g
+    - Crear una app MEAN en google cloud
+- https://www.cloudskillsboost.google/focuses/54356?locale=ko&parent=catalog
+    - Conectar dos app, una front y otra back

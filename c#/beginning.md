@@ -21,7 +21,7 @@
 [Switch](#switch)
 
 
-## Import Package
+## Import-Package
 
 - `using Package_Name;`
 
@@ -37,7 +37,7 @@ namespace NAMESPACE_NAME {
 
 ## Main Function
 
-The main function allows you to run code on after startup
+The main function allows you to run code after startup
 
 ```c#
 namespace NAMESPACE_NAME {
@@ -58,7 +58,7 @@ namespace NAMESPACE_NAME {
 
 - `System.Console.Write`
 
-## OutPut Format
+## Output Format
 
 - Currency
 
@@ -66,7 +66,7 @@ namespace NAMESPACE_NAME {
 Console.WriteLine("Currency : {0:c}", 23.455)
 ```
 
-That way of treat the string remind me the pipes in angular. The `c` is a pipe of currency. This means that the value that will be show in the console will be formatted using the currency standard.
+That way of treating the string reminds me of the pipes in angular. The `c` is a pipe of currency. This means that the value that will be shown in the console will be formatted using the currency standard.
 
 - fill the number with zeros at the beginning
 
@@ -74,7 +74,7 @@ That way of treat the string remind me the pipes in angular. The `c` is a pipe o
 Console.WriteLine("Currency : {0:d4}", 23)
 ```
 
-This formater will add zeros before the number. The amount of zeros is `4` (in this case) - the number, so the final value will be: `0023`
+This format will add zeros before the number. The amount of zeros is `4` (in this case) - the number, so the final value will be: `0023`
 
 - Fix decimal places
 
@@ -90,7 +90,7 @@ The `f3` allows only 3 decimal digits in a number. So the above example will be 
 Console.WriteLine("Currency : {0:n4}", 23.12)
 ```
 
-The `n#` formater will add zeros after the point value of a number. The amount of zeros will be the `#` (in this case 4) - the amount of  numbers after the comma. This case will be: `23.1200`
+The `n#` format will add zeros after the point value of a number. The number of zeros will be the `#` (in this case 4) - numbers after the comma. This case will be: `23.1200`
 
 ## Get Console input value
 
@@ -102,7 +102,7 @@ The `n#` formater will add zeros after the point value of a number. The amount o
 - `bool` -> True or false value
 - `int` -> Integer values
 - `long` -> Bigger than int without decimal points
-- `decimal` -> a number with decimal point 
+- `decimal` -> a number with a decimal point 
 - `double` -> decimal value but with precision loss
 - `float` -> like double but with less precision
 - `Type []` -> Array of a specific type
@@ -142,7 +142,7 @@ string strVal = intFromStr.toString();
 Console.WriteLine($"Data with lost in conversion {(int)dbNumber}")
 ```
 
-In this type of conversion we always going to lose some data from the original value.
+In this type of conversion, we always going to lose some data from the original value.
 
 ## Implicit conversion
 
@@ -156,7 +156,7 @@ long data = intValue;
 
 - `Console.WriteLine($"Hello {world}")`
 
-The $ symbol represents a template string. And the {} represent a variable inside a string chain.
+The $ symbol represents a template string. And the {} represents a variable inside a string chain.
 
 - `Console.Write("Biggest Integer: {0}", ...args)`
 
@@ -178,9 +178,9 @@ Check if a string contains a specific value.
 
 - IndexOf
 
-Check position of an element
+Check the position of an element
 
-`stringValue.IndexOf("is")` -> return -1 if the element doesn't exist, otherwise returns a number above -1.
+`stringValue.IndexOf("is")` -> returns -1 if the element doesn't exist, otherwise returns a number above -1.
 
 - Remove
 
@@ -202,7 +202,7 @@ Insert a string value inside another string
 
 `stringValue.Compare("A", "B")` -> Compare two string
 
-If with want to add the ignoreCase to the string comparison, wee need to write:
+If with want to add the ignoreCase to the string comparison, we need to write:
 
 `stringValue.Compare("A", "B", StringComparison.OrdinalIgnoreCase)` -> Compare two string
 
@@ -223,7 +223,7 @@ Use " inside a String.
 There are two types of comments:
 
 1. Line comment: `// hello world`
-2. Multi line comment: `/* */`
+2. Multi-line comment: `/* */`
 
 ## Array
 
@@ -296,7 +296,7 @@ switch (data){
 }
 ```
 
-## Try Catch
+## Try-Catch
 
 ```c#
 try{}
@@ -304,7 +304,7 @@ catch(DataType var){}
 finally{}
 ```
 
-## Convertir variables
+## Convert variables
 
 ```c#
 Convert.ToDouble(var);
@@ -335,7 +335,7 @@ enum CL : byte {
 }
 ```
 
-## Clases
+## Classes
 
 > Allows overloading
 
@@ -518,7 +518,7 @@ public class CatA : AnimalA
 
 > Use abstract when you want to create a class with base behavior but one or more methods needs to be override in the children classes.
 
-- Implementation of those clases
+- Implementation of those classes
 
 ```c#
 
@@ -595,15 +595,15 @@ foreach (object o in stack){} // Loop over queue -> Please don't do this
 
 ### List
 
-A little about list. You know the basics, but this one is so cool.
+A little about lists. You know the basics, but this one is so cool.
 
-`ZIP` -> This list methods allows you to iterate over two list at the same time and use an arrow function with a tuple as params (x,y).
+`ZIP` -> This list method allows you to iterate over two lists at the same time and use an arrow function with a tuple as params (x,y).
 
-`Aggregate` -> Takes all the values from an array and return a single element. The function to be used in this method is an arrow function.
+`Aggregate` -> Takes all the values from an array and returns a single element. The function to be used in this method is an arrow function.
 
 `All` -> Iterate over all list values and find if all values fulfill a condition.
 
-`Any` -> Same as above method, but the condition only need to be fulfill one time.
+`Any` -> Same as the above method, but the condition only needs to be fulfilled one time.
 
 ### Generics
 
@@ -621,7 +621,7 @@ class Animal {
 
 ### IEnumerable
 
-The interface IEnumerable allow you to iterate over an non generic collection. Example a custom class. Lets see an example:
+The interface IEnumerable allows you to iterate over a non-generic collection. Example a custom class. Let's see an example:
 
 ```c#
 class Person {
@@ -649,7 +649,7 @@ class People: IEnumerable //We are going to convert this class in an iterable
 
 ### Operator overloading
 
-This type of functions allow us to change the behavior of normal operators like + or - in particular situations. Example, if you have a class of Box (length, width) you can change the behavior of + by doing:
+This type of function allows us to change the behavior of normal operators like + or - in particular situations. For example, if you have a class of Box (length, width) you can change the behavior of + by doing:
 
 ```c#
 public static Box operator +(Box box1, Box box2){
@@ -662,9 +662,9 @@ public static Box operator +(Box box1, Box box2){
 }
 ```
 
-The above method will override the behavior of box1 + box2 in the main code. Instead of the default behavior of that symbol, now when to boxes are added, a new Box will be created.
+The above method will override the behavior of box1 + box2 in the main code. Instead of the default behavior of that symbol, now when two boxes are added, a new Box will be created.
 
-Also you can overload explicit an implicit operator as int() or Box(). Lets see some examples:
+Also, you can overload explicit an implicit operator as int() or Box(). Let's see some examples:
 
 > Explicit convert box to int
 ```c#
@@ -704,7 +704,7 @@ var innerJoin = form animal in animals
 
 #### Threads
 
-Capacity of use CPU threads in a c# program. Lets see an example:
+The capacity to use CPU threads in a c# program. Let's see an example:
 
 ```c#
 static void Pring1(){
@@ -745,7 +745,7 @@ for (int i=0; i < 15; i++){
 
 #### Lock
 
-Is like a transaction. The operation will be locked until it finish. Example:
+Is like a transaction. The operation will be locked until it finishes. Example:
 
 ```c#
 public double Withdraw(double amt) {
@@ -757,7 +757,7 @@ public double Withdraw(double amt) {
 
 #### Directory Info
 
-This class allows you to access to a specific directory information.
+This class allows you to access specific directory information.
 
 ```c#
 DirectoryInfo directInfo = new DirectoryInfo("PATH TO DIRECTORY")
@@ -767,7 +767,7 @@ Directory.METHOD // Static class to play around with directories.
 
 #### File
 
-The file class allow us to interact with the PC file system. Lest's see an example:
+The file class allows us to interact with the PC file system. Let's see an example:
 
 ```c#
 string textFilePath = @"C:\Users\MyUser\data.txt"; // Set the location
@@ -776,7 +776,7 @@ File.WriteAllLines(textFilePath, dataToStore); // Creates a file and write insid
 File.ReadAllLines(textFilePath); // Reads all lines from a file
 ```
 
-What happen if I want to only get the info of a file. Well, you can use `FileInfo` for this. An simple example will be provided below:
+What happens if I want to only get the info of a file? Well, you can use `FileInfo` for this. A simple example will be provided below:
 
 ```c#
 DirectoryInfo myDir = new DirectoryInf( @"C:\Users\MyUser")// Set directory path
@@ -840,7 +840,7 @@ br.ReadString(); // Read a line that will be a string. You can read the lines an
 
 #### Serialization
 
-Allows you to convert an object to a readable or a sort of transported state (JSON, XML, Binary to mention a few). And deserialization is the oposite, convert a readable data into an object. As an example we have the class `Animal` and that class will be marked as serializable
+Allows you to convert an object to a readable or a sort of transported state (JSON, XML, Binary to mention a few). And deserialization is the opposite, converting readable data into an object. As an example, we have the class `Animal` and that class will be marked as serializable
 
 ```c#
 [Serializable()]
@@ -864,7 +864,7 @@ class Animal : ISerializable {
 }
 ```
 
-In the main class we import two serialization libraries:
+In the main class, we import two serialization libraries:
 - `System.Runtime.Serialization.Formatters.Binary` -> Serialize to binary
 - `System.Xml.Serialization` -> To XML file
 
