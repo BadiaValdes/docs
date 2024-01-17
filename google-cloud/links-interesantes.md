@@ -32,9 +32,15 @@
     - GCP CI/CD Pipeline con Cloud Build y repo de github
 - https://cloud.google.com/run/docs/tutorials/secure-services
     - Conectar dos servicios, uno frontend y otro backend
-- https://developers.google.com/learn/pathways/solution-three-tier-cloud-run
-    - Artículos sobre creación de aplicaciones con google cloud
 - https://www.youtube.com/watch?v=-US__I2-u3g
     - Crear una app MEAN en google cloud
 - https://www.cloudskillsboost.google/focuses/54356?locale=ko&parent=catalog
     - Conectar dos app, una front y otra back
+- https://medium.com/@dipan.saha/cloud-identity-aware-proxy-iap-48f190201653
+    - IAP
+- https://www.youtube.com/watch?v=qIjFPnGcv_s
+    - LDAP SYNC
+- https://www.youtube.com/watch?v=OkqRTNluXOg
+    - Identity Platform auth
+- https://www.youtube.com/watch?v=WsyySjFwwyI&list=PLBgogxgQVM9tEGqcLF7DL_Q0sst5RvPLn&index=1
+    - Google Security Showcase
