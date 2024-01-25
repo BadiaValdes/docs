@@ -23,24 +23,30 @@
 - https://cloud.google.com/run/docs/securing/managing-access
     - Brindar acceso a `Cloud Run` mediante `IAm`
 - https://www.cloudskillsboost.google/paths/19/course_templates/530
-    - Desarrollo de una aplicación contenerizada en google cloud
+    - Desarrollo de una `aplicación` contenerizada en google cloud
 - https://cloud.google.com/blog/topics/developers-practitioners/devops-and-cicd-google-cloud-explained
-    - Google Cloud CI-CD explicado
+    - Google Cloud `CI-CD` explicado
 - https://kevinsimper.medium.com/building-docker-images-with-docker-compose-on-google-cloud-container-builder-292b1eb3fd31
-    - Usar docker compose en google cloud
+    - Usar `docker` compose en google cloud
 - https://dev.to/af/gcp-cicd-pipeline-build-docker-images-after-commits-to-a-repo-branch-google-cloud-source-repositories-500o
-    - GCP CI/CD Pipeline con Cloud Build y repo de github
+    - GCP `CI/CD` Pipeline con Cloud Build y repo de github
 - https://cloud.google.com/run/docs/tutorials/secure-services
-    - Conectar dos servicios, uno frontend y otro backend
+    - Conectar dos servicios, uno `frontend` y otro `backend`
 - https://www.youtube.com/watch?v=-US__I2-u3g
-    - Crear una app MEAN en google cloud
+    - Crear una app `MEAN` en google cloud
 - https://www.cloudskillsboost.google/focuses/54356?locale=ko&parent=catalog
     - Conectar dos app, una front y otra back
 - https://medium.com/@dipan.saha/cloud-identity-aware-proxy-iap-48f190201653
-    - IAP
+    - `IAP`
 - https://www.youtube.com/watch?v=qIjFPnGcv_s
-    - LDAP SYNC
+    - `LDAP` SYNC
 - https://www.youtube.com/watch?v=OkqRTNluXOg
-    - Identity Platform auth
+    - `Identity Platform auth`
 - https://www.youtube.com/watch?v=WsyySjFwwyI&list=PLBgogxgQVM9tEGqcLF7DL_Q0sst5RvPLn&index=1
-    - Google Security Showcase
+    - `Google Security Showcase`
+- https://www.youtube.com/watch?v=rmQovUuR5O4
+    - Explicación de `cloud run`
+- https://medium.com/nerd-for-tech/google-oauth2-0-authentication-using-node-js-and-passportjs-1a77f42b1111
+    - `auth` with `passport`
+- https://cloud.google.com/run/docs/tutorials/identity-platform?hl=es-419
+    - `auth` with `firebase`
